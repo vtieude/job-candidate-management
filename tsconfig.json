@@ -1,0 +1,19 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+     "target": "es2022",
+      "module": "commonjs",           // Use ESNext for module resolution
+      "rootDir": "./src",           // Directory containing source files
+      "outDir": "./dist",         // Directory for compiled files
+      "strict": true,                // Enable strict type-checking options
+      "esModuleInterop": true,       // Enable compatibility with CommonJS
+      "skipLibCheck": true,           // Skip type checking of declaration files       // Skip type checking of declaration files    // Enable compatibility with CommonJS
+      "moduleResolution": "Node"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+   "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+  }
+}
