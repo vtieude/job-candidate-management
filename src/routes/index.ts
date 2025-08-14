@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import candidateRoute from './candidate';
-import jobRoute from './job';
+import candidateRoute from './candidate.route';
+import jobRoute from './job.route';
 const route = Router();
 
 route.use('/candidate', candidateRoute);

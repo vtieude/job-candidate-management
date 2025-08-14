@@ -1,13 +1,16 @@
 import express from 'express';
 import route from './routes/index';
+import 'dotenv/config';
 import { connectDb } from './configs/database';
+import config from './configs';
 const app = express();
-const PORT = process.env.PORT || 3000;
-const db = "mongodb://localhost:27017/test";
+const PORT = config.port;
+const db = config.dbUrl;
 
 
 const startServer = async() => {
     try {
+        console.log('hre is db', db);
         // Connect to MongoDB
         await connectDb({ db });
 
