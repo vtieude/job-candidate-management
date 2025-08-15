@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import * as jobService from '../services/job.service'
 import { IJob } from '../schema/job.schema';
-import { ModifiedPathsSnapshot, Document, Model, Types, ClientSession, DocumentSetOptions, QueryOptions, MergeType, UpdateQuery, AnyObject, PopulateOptions, Query, SaveOptions, ToObjectOptions, UpdateWithAggregationPipeline, pathsToSkip, Error } from 'mongoose';
 
 const jobRoute = Router();
 

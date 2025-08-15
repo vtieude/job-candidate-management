@@ -23,4 +23,4 @@ const JobSchema: Schema<JobDoc> = new Schema({
   },
 });
 
-export const Job = model < IJob > ("Job", JobSchema);
+export const Job = model < JobDoc > ("Job", JobSchema);

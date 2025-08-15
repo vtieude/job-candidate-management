@@ -8,7 +8,7 @@
       "strict": true,                // Enable strict type-checking options
       "esModuleInterop": true,       // Enable compatibility with CommonJS
       "skipLibCheck": true,           // Skip type checking of declaration files       // Skip type checking of declaration files    // Enable compatibility with CommonJS
-      "moduleResolution": "Node"
+      "moduleResolution": "Node",
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"],

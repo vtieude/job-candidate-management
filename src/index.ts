@@ -10,11 +10,13 @@ const db = config.dbUrl;
 
 const startServer = async() => {
     try {
-        console.log('hre is db', db);
+        console.log('hre is db2222', db);
         // Connect to MongoDB
         await connectDb({ db });
 
         console.log('MongoDB connected successfully');
+        // Middleware to parse JSON bodies
+        app.use(express.json());
         // Use the API routes
         app.use('/api', route);
         // Start the Express server after a successful connection
