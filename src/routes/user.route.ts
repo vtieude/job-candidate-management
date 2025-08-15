@@ -3,10 +3,12 @@ import { Request, Response } from 'express';
 import * as userService from '../services/user.service';
 import config from '../configs';
 import jwt from 'jsonwebtoken';
+import { comparePassword, generateToken } from "../utils/jwt";
+import { jwtAuthMiddleware } from "../middlewares/auth";
 
 const userRoute = Router();
 
-userRoute.get('', async (req: Request, res: Response) => {
+userRoute.get('', jwtAuthMiddleware, async (req: Request, res: Response) => {
     try {
         const users =await userService.getAllUser();
         
@@ -24,7 +26,7 @@ userRoute.post('/register', async (req: Request, res: Response) => {
         if (existingUser) {
            return res.status(400).json({ message: "user already exist" });
         }
-        const user = userService.createUser({ email, password });
+        const user = await  userService.createUser({ email, password });
         
         res.status(200).json({ message: 'User created successfully', user });
     } catch (error) {
@@ -40,11 +42,11 @@ userRoute.post('/login', async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         const user = await userService.findUserByEmail(email);
-        if (!user || !(await user.comparePassword(password))) {
+        if (!user || ! comparePassword(password, user.password)) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user._id }, config.jwtSecret, { expiresIn: '1h' });
+        const token = generateToken({ email: user.email, id: user._id as string});
         res.json({ token });
     } catch (error) {
         res.status(500).json({ error: (error as Error).message });

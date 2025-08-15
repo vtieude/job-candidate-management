@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
 export interface IJob {
-  title: String;
-  company: String;
-  location: String;
+  title: string;
+  company: string;
+  location: string;
 }
 
 export interface JobDoc extends Document, IJob {}
