@@ -1,8 +1,11 @@
 import express from 'express';
-import route from './routes/index';
 import 'dotenv/config';
 import { connectDb } from './configs/database';
 import config from './configs';
+import swaggerUi from 'swagger-ui-express';
+import { RegisterRoutes } from "./routes/routes";
+import swaggerJson from "./configs/swagger.json"; 
+import { errorHandle } from './middlewares/error.middleware';
 const app = express();
 const PORT = config.port;
 const db = config.dbUrl;
@@ -10,21 +13,20 @@ const db = config.dbUrl;
 
 const startServer = async() => {
     try {
-        console.log('hre is db2222', db);
         // Connect to MongoDB
         await connectDb({ db });
-
         console.log('MongoDB connected successfully');
-        // Middleware to parse JSON bodies
         app.use(express.json());
-        // Use the API routes
-        app.use('/api', route);
+        app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerJson));
+        // Middleware to parse JSON bodies
+        RegisterRoutes(app);
+        app.use(errorHandle);
         // Start the Express server after a successful connection
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
         });
     } catch (error) {
-        console.error('MongoDB connection error:', error);
+        console.error('Facing error:', error);
         process.exit(1); // Exit the process if connection fails
     }
 }

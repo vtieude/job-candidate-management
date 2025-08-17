@@ -9,6 +9,9 @@
       "esModuleInterop": true,       // Enable compatibility with CommonJS
       "skipLibCheck": true,           // Skip type checking of declaration files       // Skip type checking of declaration files    // Enable compatibility with CommonJS
       "moduleResolution": "Node",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "resolveJsonModule": true,
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"],

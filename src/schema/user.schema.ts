@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 import bcrypt from 'bcryptjs';
+import { IBaseTimestamps } from "./base.schema";
 
-export interface IUser {
+export interface IUser extends IBaseTimestamps {
   email: string;
   password: string;
 }
@@ -19,7 +20,9 @@ const UserSchema: Schema<UserDoc> = new Schema({
   password: {
     type: String,
     required: true,
-  },
+  }
+}, {
+  timestamps: true
 });
 
 // Pre-save hook to hash password

@@ -9,8 +9,8 @@ export const generateToken = (payload: IAuthPayload) => {
   return jwt.sign(payload, config.jwtSecret, { expiresIn: Constants.Auth.ExpiresIn, });
 }
 
-export const comparePassword = (inputPassword: string, passwordHash: string) => {
-  return bcrypt.compare(inputPassword, passwordHash);
+export const comparePassword = async (inputPassword: string, passwordHash: string) => {
+  return await bcrypt.compare(inputPassword, passwordHash);
 }
 
 export const verifyToken = (token: string)  => {
