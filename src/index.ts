@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { RegisterRoutes } from "./routes/routes";
 import swaggerJson from "./configs/swagger.json"; 
 import { errorHandle } from './middlewares/error.middleware';
+import cors from 'cors';
 const app = express();
 const PORT = config.port;
 const db = config.dbUrl;
@@ -16,6 +17,8 @@ const startServer = async() => {
         // Connect to MongoDB
         await connectDb({ db });
         console.log('MongoDB connected successfully');
+        // Enable CORS for all origins
+        app.use(cors());
         app.use(express.json());
         app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerJson));
         // Middleware to parse JSON bodies
