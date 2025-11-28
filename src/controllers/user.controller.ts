@@ -1,5 +1,6 @@
 import { Get, Route, Tags, Post, Body, Request, Security } from 'tsoa';
-import * as userService from '../services/user.service'
+import * as userService from '../services/user.service';
+import * as openApiService from '../services/openAPI.service';
 import { IUser } from '../schema/user.schema';
 import { UserRequest } from '../inputs/user.input';
 import { Constants } from '../configs/constant';
@@ -7,6 +8,7 @@ import { HttpError } from '../utils/httpError';
 import { comparePassword, generateToken } from '../utils/jwt';
 import * as express from 'express';
 import { UserProfile } from '../middlewares/auth.middleware';
+import { IChatMessagePayload } from '../interfaces';
 
 @Route('users')
 @Tags('Users')
@@ -23,6 +25,12 @@ export class UserController {
     return await userService.findUserByEmail(userProfile.email);
   }
 
+  @Post('/chatWithGPT')
+  public async chatWithGPT(@Body() message: IChatMessagePayload): Promise<string> {
+    console.log(message)
+    return await openApiService.chatWithGPT(message.message);
+  }
+
   @Security(Constants.SecurityMethod.PUBLIC)
   @Post('/register')
   public async register(@Body() body: UserRequest): Promise<IUser> {
@@ -37,7 +45,7 @@ export class UserController {
       throw new HttpError(Constants.HttpStatus.NOT_FOUND, 'User not found');
     }
     if (await comparePassword(body.password ,user.password)) {
-      return generateToken({ email: body.email, id: user._id as string })
+      return generateToken({ email: body.email, id: user._id as unknown as string })
     }
     throw new HttpError(Constants.HttpStatus.UNAUTHORIZED, 'User not found');
   }

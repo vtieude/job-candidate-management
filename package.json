@@ -30,9 +30,11 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
+    "openai": "^6.9.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "tsoa": "^6.6.0"
+    "tsoa": "^6.6.0",
+    "undici": "^7.16.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

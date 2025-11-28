@@ -31,6 +31,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IChatMessagePayload": {
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserRequest": {
 				"properties": {
 					"email": {
@@ -310,6 +322,42 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/users/chatWithGPT": {
+			"post": {
+				"operationId": "ChatWithGPT",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IChatMessagePayload"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/users/register": {
