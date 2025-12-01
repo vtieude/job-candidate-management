@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 import { CandidateStatusEnum } from "../configs/enum";
 import { IBaseTimestamps } from "./base.schema";
 
