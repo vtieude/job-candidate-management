@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 import { JobCandidateStatusEnum } from "../configs/enum";
 import { Job } from "./job.schema";
 import { Candidate } from "./candidate.schema";

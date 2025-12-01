@@ -27,7 +27,6 @@ export class UserController {
 
   @Post('/chatWithGPT')
   public async chatWithGPT(@Body() message: IChatMessagePayload): Promise<string> {
-    console.log(message)
     return await openApiService.chatWithGPT(message.message);
   }
 

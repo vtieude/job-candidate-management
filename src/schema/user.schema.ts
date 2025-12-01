@@ -26,11 +26,10 @@ const UserSchema: Schema<UserDoc> = new Schema({
 });
 
 // Pre-save hook to hash password
-UserSchema.pre<UserDoc>('save', async function(next) {
-    if (!this.isModified('password')) return next();
+UserSchema.pre<UserDoc>('save', async function() {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password as string, salt);
-    next();
 });
 
 export const User = model < UserDoc > ("User", UserSchema);
