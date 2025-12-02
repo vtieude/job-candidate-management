@@ -1,10 +1,12 @@
-import mongoose, { Schema, Document, model } from "mongoose";
+import { Schema, Document, model } from "mongoose";
 import bcrypt from 'bcryptjs';
 import { IBaseTimestamps } from "./base.schema";
+import { RoleEnum } from "../configs/enum";
 
 export interface IUser extends IBaseTimestamps {
   email: string;
   password: string;
+  role: RoleEnum;
 }
 
 export interface UserDoc extends Document, IUser {}
@@ -18,6 +20,10 @@ const UserSchema: Schema<UserDoc> = new Schema({
     unique: true
   },
   password: {
+    type: String,
+    required: true,
+  },
+  role: {
     type: String,
     required: true,
   }

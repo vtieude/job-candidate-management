@@ -11,3 +11,9 @@ export enum JobCandidateStatusEnum {
   Interview = 'interview',
   Hired = 'hired'
 }
+
+export enum RoleEnum {
+  Admin = 'Admin',
+  Recruiter = 'Recruiter',
+  Candidate = 'Candidate'
+}

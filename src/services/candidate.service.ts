@@ -1,7 +1,7 @@
 import { Candidate, ICandidate } from "../schema/candidate.schema";
 
 
-export const getAllCandiates = async () => {
+export const getAllCandidates = async () => {
   return await Candidate.find();
 }
 
