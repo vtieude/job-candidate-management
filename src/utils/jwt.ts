@@ -13,6 +13,6 @@ export const comparePassword = async (inputPassword: string, passwordHash: strin
   return await bcrypt.compare(inputPassword, passwordHash);
 }
 
-export const verifyToken = (token: string)  => {
-  return jwt.verify(token, config.jwtSecret);
+export const verifyToken = (token: string): IAuthPayload  => {
+  return jwt.verify(token, config.jwtSecret) as IAuthPayload;
 }

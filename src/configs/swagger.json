@@ -7,6 +7,14 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"RoleEnum": {
+				"enum": [
+					"Admin",
+					"Recruiter",
+					"Candidate"
+				],
+				"type": "string"
+			},
 			"IUser": {
 				"properties": {
 					"createdAt": {
@@ -22,11 +30,15 @@
 					},
 					"password": {
 						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/RoleEnum"
 					}
 				},
 				"required": [
 					"email",
-					"password"
+					"password",
+					"role"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -43,6 +55,25 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"RegisterUserRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/RoleEnum"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserRequest": {
 				"properties": {
 					"email": {
@@ -55,6 +86,18 @@
 				"required": [
 					"email",
 					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AssignJobRequest": {
+				"properties": {
+					"candidateId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"candidateId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -105,18 +148,6 @@
 					"company",
 					"location",
 					"status"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"AssignJobRequest": {
-				"properties": {
-					"candidateId": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"candidateId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -287,7 +318,9 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"Admin"
+						]
 					}
 				],
 				"parameters": []
@@ -389,7 +422,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UserRequest"
+								"$ref": "#/components/schemas/RegisterUserRequest"
 							}
 						}
 					}
@@ -432,7 +465,7 @@
 				}
 			}
 		},
-		"/jobs/{jobId}/stats": {
+		"/jobCandidates/stats": {
 			"get": {
 				"operationId": "GetAllJobs",
 				"responses": {
@@ -461,7 +494,7 @@
 					}
 				},
 				"tags": [
-					"Jobs"
+					"JobCandidates"
 				],
 				"security": [
 					{
@@ -478,6 +511,51 @@
 						}
 					}
 				]
+			}
+		},
+		"/jobCandidates/assign": {
+			"post": {
+				"operationId": "AssignJobAndCandidate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"JobCandidates"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "jobId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AssignJobRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/jobs/{jobId}": {
@@ -694,51 +772,6 @@
 				}
 			}
 		},
-		"/jobs/{jobId}/assign": {
-			"post": {
-				"operationId": "AssignJobAndCandidate",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "boolean"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Jobs"
-				],
-				"security": [
-					{
-						"jwt": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "jobId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/AssignJobRequest"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/candidates": {
 			"get": {
 				"operationId": "GetAllCandidates",
@@ -762,7 +795,10 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"Admin",
+							"Recruiter"
+						]
 					}
 				],
 				"parameters": []
@@ -775,7 +811,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ICandidate"
+									"$ref": "#/components/schemas/BaseCandidateRequest"
 								}
 							}
 						}
@@ -786,7 +822,9 @@
 				],
 				"security": [
 					{
-						"jwt": []
+						"jwt": [
+							"Candidate"
+						]
 					}
 				],
 				"parameters": [],
@@ -800,9 +838,91 @@
 						}
 					}
 				}
+			},
+			"patch": {
+				"operationId": "UpdateCandidate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Candidates"
+				],
+				"security": [
+					{
+						"jwt": [
+							"Admin",
+							"Recruiter"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "candidateId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BaseCandidateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteCandidate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Candidates"
+				],
+				"security": [
+					{
+						"jwt": [
+							"Admin",
+							"Recruiter"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "candidateId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
-		"/candidates/{email}": {
+		"/candidates/email": {
 			"get": {
 				"operationId": "GetCandidateByEmail",
 				"responses": {
@@ -834,84 +954,6 @@
 					{
 						"in": "query",
 						"name": "email",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/candidates/{candidateId}": {
-			"patch": {
-				"operationId": "UpdateJob",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Boolean"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Candidates"
-				],
-				"security": [
-					{
-						"jwt": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "candidateId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/BaseCandidateRequest"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteJob",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Boolean"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Candidates"
-				],
-				"security": [
-					{
-						"jwt": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "candidateId",
 						"required": true,
 						"schema": {
 							"type": "string"
