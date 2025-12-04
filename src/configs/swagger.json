@@ -19,11 +19,13 @@
 				"properties": {
 					"createdAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"updatedAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"email": {
 						"type": "string"
@@ -113,11 +115,13 @@
 				"properties": {
 					"createdAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"updatedAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"title": {
 						"type": "string"
@@ -154,14 +158,6 @@
 			},
 			"BaseJobRequest": {
 				"properties": {
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					},
 					"title": {
 						"type": "string"
 					},
@@ -170,6 +166,9 @@
 					},
 					"location": {
 						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/JobStatusEnum"
 					},
 					"salaryMin": {
 						"type": "number",
@@ -181,9 +180,6 @@
 					},
 					"description": {
 						"type": "string"
-					},
-					"status": {
-						"$ref": "#/components/schemas/JobStatusEnum"
 					}
 				},
 				"required": [
@@ -211,11 +207,13 @@
 				"properties": {
 					"createdAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"updatedAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "Don't need to include when creating."
 					},
 					"email": {
 						"type": "string"
@@ -244,14 +242,6 @@
 			},
 			"BaseCandidateRequest": {
 				"properties": {
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					},
 					"email": {
 						"type": "string"
 					},
@@ -817,6 +807,7 @@
 						}
 					}
 				},
+				"description": "Required  candidate role",
 				"tags": [
 					"Candidates"
 				],

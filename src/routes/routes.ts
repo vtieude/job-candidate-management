@@ -97,15 +97,13 @@ const models: TsoaRoute.Models = {
     "BaseJobRequest": {
         "dataType": "refObject",
         "properties": {
-            "createdAt": {"dataType":"datetime"},
-            "updatedAt": {"dataType":"datetime"},
             "title": {"dataType":"string","required":true},
             "company": {"dataType":"string","required":true},
             "location": {"dataType":"string","required":true},
+            "status": {"ref":"JobStatusEnum","required":true},
             "salaryMin": {"dataType":"double"},
             "salaryMax": {"dataType":"double"},
             "description": {"dataType":"string"},
-            "status": {"ref":"JobStatusEnum","required":true},
         },
         "additionalProperties": false,
     },
@@ -138,8 +136,6 @@ const models: TsoaRoute.Models = {
     "BaseCandidateRequest": {
         "dataType": "refObject",
         "properties": {
-            "createdAt": {"dataType":"datetime"},
-            "updatedAt": {"dataType":"datetime"},
             "email": {"dataType":"string","required":true},
             "fullName": {"dataType":"string","required":true},
             "skills": {"dataType":"array","array":{"dataType":"string"},"required":true},
@@ -448,6 +444,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsJobController_createJob: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
                 input: {"in":"body","name":"input","required":true,"ref":"BaseJobRequest"},
         };
         app.post('/jobs',
@@ -603,6 +600,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsCandidateController_createCandidate: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
                 input: {"in":"body","name":"input","required":true,"ref":"BaseCandidateRequest"},
         };
         app.post('/candidates',

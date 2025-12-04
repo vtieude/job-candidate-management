@@ -34,6 +34,5 @@ export const searchJob = async(q?: string, location?: string, minSalary?: number
     if (minSalary !== undefined) filter.$and.push({salaryMin: { $gte: minSalary }});
     if (maxSalary !== undefined) filter.$and.push({salaryMax: { $lte: maxSalary }});
   }
-  console.log(filter)
   return await Job.find(filter).exec();
 }

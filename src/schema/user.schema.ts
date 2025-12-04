@@ -25,6 +25,7 @@ const UserSchema: Schema<UserDoc> = new Schema({
   },
   role: {
     type: String,
+    default: RoleEnum.Candidate,
     required: true,
   }
 }, {

@@ -28,7 +28,7 @@ export class JobCandidateController {
     if (!candidate) {
       throw new HttpError(Constants.HttpStatus.NOT_FOUND, 'Candidate not found');
     }
-    await jobCandidateService.assingCandidateAndJob(jobId, input.candidateId, JobCandidateStatusEnum.Applied);
+    await jobCandidateService.assignCandidateAndJob(jobId, input.candidateId, JobCandidateStatusEnum.Applied);
     return true;
   }
 }

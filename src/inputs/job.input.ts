@@ -1,9 +1,8 @@
 // src/models/User.ts
 
 import { JobStatusEnum } from "../configs/enum";
-import { IJob } from '../schema/job.schema'
 
-export class BaseJobRequest implements IJob {
+export class BaseJobRequest  {
   title!: string;
 
   company!: string;

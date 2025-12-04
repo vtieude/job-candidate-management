@@ -25,9 +25,9 @@ export const getAllActiveCandidates = async (jobId: string): Promise<number> => 
   return activeCounts[0]?.activeCount || 0;
 }
 
-export const assingCandidateAndJob = async (jobId: string, candidateId: string, status: JobCandidateStatusEnum) => {
-  const existJobCanidate = await JobCandidate.find({job: jobId, candidate: candidateId, status: status});
-  if (existJobCanidate) {
+export const assignCandidateAndJob = async (jobId: string, candidateId: string, status: JobCandidateStatusEnum) => {
+  const existJobCandidate = await JobCandidate.find({job: jobId, candidate: candidateId, status: status});
+  if (existJobCandidate) {
     throw new HttpError(Constants.HttpStatus.CONFLICT, 'Candidate already applied');
   }
   await JobCandidate.create({

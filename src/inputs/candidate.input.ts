@@ -1,9 +1,8 @@
 // src/models/User.ts
 
-import { CandidateStatusEnum, JobStatusEnum } from "../configs/enum";
-import { ICandidate } from "../schema/candidate.schema";
+import { CandidateStatusEnum } from "../configs/enum";
 
-export class BaseCandidateRequest implements ICandidate {
+export class BaseCandidateRequest {
   email!: string;
   fullName!: string;
   skills!: string[];
