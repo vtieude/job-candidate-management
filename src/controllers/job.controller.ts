@@ -1,8 +1,10 @@
-import { Get, Route, Tags, Post, Body, Query, Security, Patch, Delete } from 'tsoa';
+import { Get, Route, Tags, Post, Body, Query, Request, Security, Patch, Delete } from 'tsoa';
 import { IJob } from '../schema/job.schema';
 import * as jobService from '../services/job.service';
 import { BaseJobRequest } from '../inputs/job.input';
 import { Constants } from '../configs/constant';
+import * as express from 'express';
+import { IAuthPayload } from '../interfaces';
 
 @Route('jobs')
 @Tags('Jobs')
@@ -25,7 +27,8 @@ export class JobController {
   }
 
   @Post('/')
-  public async createJob(@Body() input: BaseJobRequest): Promise<IJob> {
+  public async createJob(@Request() req: express.Request, @Body() input: BaseJobRequest): Promise<IJob> {
+    const userProfile = (req as any).user as IAuthPayload;
     return await jobService.createJob(input);
   }
 

@@ -1,6 +1,7 @@
 import { Document, Schema, model } from "mongoose";
 import { CandidateStatusEnum } from "../configs/enum";
 import { IBaseTimestamps } from "./base.schema";
+import { UserDoc } from "./user.schema";
 
 export interface ICandidate extends IBaseTimestamps {
   email: string;
@@ -9,7 +10,9 @@ export interface ICandidate extends IBaseTimestamps {
   status: CandidateStatusEnum;
 }
 
-export interface CandidateDoc extends Document, ICandidate {}
+export interface CandidateDoc extends Document, ICandidate {
+  user: UserDoc['_id'] | UserDoc
+}
 
 
 const CandidateSchema: Schema<CandidateDoc> = new Schema({
@@ -30,7 +33,8 @@ const CandidateSchema: Schema<CandidateDoc> = new Schema({
     type: String,
     enum: CandidateStatusEnum,
     default: CandidateStatusEnum.InActive
-  }
+  },
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, {
   timestamps: true
 });

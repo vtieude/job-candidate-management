@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document, model } from "mongoose";
+import mongoose, { Schema, Document, model, Types } from "mongoose";
 import { JobStatusEnum } from "../configs/enum";
 import { IBaseTimestamps } from "./base.schema";
+import { UserDoc } from "./user.schema";
 
 export interface IJob extends IBaseTimestamps {
   title: string;
@@ -12,7 +13,9 @@ export interface IJob extends IBaseTimestamps {
   status: JobStatusEnum;
 }
 
-export interface JobDoc extends Document, IJob {}
+export interface JobDoc extends Document, IJob {
+  recruiter: UserDoc['_id']
+}
 
 const JobSchema: Schema<JobDoc> = new Schema({
   title: {
@@ -42,6 +45,7 @@ const JobSchema: Schema<JobDoc> = new Schema({
   description: {
     type: String,
   },
+  recruiter: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, {
   timestamps: true
 });
