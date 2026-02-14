@@ -17,4 +17,4 @@ RUN npm install --production
 COPY --from=builder  /app/dist ./dist
 RUN npm install pm2 -g
 EXPOSE 3000
-CMD ["pm2-runtime","dist/index.js"]
+CMD ["pm2-runtime","dist/main.js"]
