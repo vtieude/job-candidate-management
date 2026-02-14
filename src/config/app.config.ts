@@ -7,7 +7,7 @@ export const appConfig: AppConfig = {
     // dbName: process.env.MONGO_DB!,
     // dbUser: process.env.MONGO_USER!,
     // dbPass: process.env.MONGO_PASS!,
-    dbUrl: process.env.MONGO_URI!,
+    dbUrl: process.env.MONGODB_URI!,
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'my-secret-key',
