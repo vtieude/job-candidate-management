@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { SearchJobDto } from './dto/search-job.dto';
 
 @Controller('jobs')
 export class JobsController {
@@ -14,11 +15,8 @@ export class JobsController {
 
   @Get()
   findAll(
-    @Query() q?: string,
-    @Query() location?: string,
-    @Query() minSalary?: number,
-    @Query() maxSalary?: number) {
-    return this.jobsService.findAll(q, location, minSalary, maxSalary);
+    @Query() query: SearchJobDto) {
+    return this.jobsService.findAll(query.q, query.location, query.minSalary, query.maxSalary);
   }
 
   @Get(':id')
