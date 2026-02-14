@@ -12,6 +12,7 @@ import { Connection } from 'mongoose';
 import { CandidatesModule } from './modules/candidates/candidates.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobCandidateModule } from './modules/job-candidate/job-candidate.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { JobCandidateModule } from './modules/job-candidate/job-candidate.module
     JobsModule,
     JobCandidateModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     { provide: APP_FILTER, useClass: ExceptionsFilter },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
