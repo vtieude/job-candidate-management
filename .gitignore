@@ -1,5 +1,9 @@
-# Node modules
-node_modules/
+# Compiled output
+/dist
+/node_modules
+
+# Build artifacts
+*.tsbuildinfo
 
 # Logs
 logs
@@ -8,25 +12,25 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
-.env
-
-# Build output
-dist/
-build/
-
-# Dependency directories
-jspm_packages/
-
-# IDE or editor folders
-.idea/
-.vscode/
-
-# Operating system files
+# OS files
 .DS_Store
 Thumbs.db
 
-# Temporary files
-tmp/
-temp/
-data/
+# IDEs and editors
+/.idea
+/.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables (Crucial for security)
+.env
+.env.development
+.env.production
+.env.local
+
+# Tests and coverage
+/coverage
+/.nyc_output
+
+# Docker
+.dockerignore
