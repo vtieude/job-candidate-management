@@ -16,19 +16,20 @@ export class JobsService {
 
   async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number) {
     // Text search on title, company, description
-  const filter: any = {};
-  if (q) {
-    filter.$text = { $search: q };
-  }
-  if (location) {
-    filter.$and = [{ location: { $regex: location, $options: "i" } }];
-  }
-  if (minSalary !== undefined || maxSalary !== undefined) {
-    filter.$and = filter.$and || [];
-    if (minSalary !== undefined) filter.$and.push({salaryMin: { $gte: minSalary }});
-    if (maxSalary !== undefined) filter.$and.push({salaryMax: { $lte: maxSalary }});
-  }
-  return await this.jobModel.find(filter).exec();
+    const filter: any = {};
+    if (!!q) {
+      filter.$text = { $search: q };
+    }
+    if (!!location) {
+      filter.$and = [{ location: { $regex: location, $options: "i" } }];
+    }
+    if (!!minSalary || !!maxSalary) {
+      filter.$and = filter.$and || [];
+      if (minSalary !== undefined) filter.$and.push({salaryMin: { $gte: minSalary }});
+      if (maxSalary !== undefined) filter.$and.push({salaryMax: { $lte: maxSalary }});
+    }
+    console.log(q)
+    return await this.jobModel.find(filter).exec();
   }
 
   async findOne(id: string) {

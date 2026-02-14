@@ -6,7 +6,7 @@ import { BaseDoc } from '../../schemas/base.schema';
 
 @Schema({ timestamps: true, collection: 'jobs' })
 export class Job extends BaseDoc {
-  @Prop({ required: true, unique: true, lowercase: true, trim: true })
+  @Prop({ required: true,  lowercase: true, trim: true })
   email!: string;
 
   @Prop({ required: true })
@@ -39,3 +39,4 @@ export class Job extends BaseDoc {
 export type JobDocument = HydratedDocument<Job>;
 export const JobSchema = SchemaFactory.createForClass(Job);
 
+JobSchema.index({ email: 1 }, { unique: true });
