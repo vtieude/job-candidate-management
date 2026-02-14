@@ -6,7 +6,7 @@ import { ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Public() // Accessible to anyone
-@Controller('auth')
+@Controller('users')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

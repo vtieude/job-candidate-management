@@ -31,6 +31,3 @@ Thumbs.db
 # Tests and coverage
 /coverage
 /.nyc_output
-
-# Docker
-.dockerignore

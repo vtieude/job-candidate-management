@@ -21,7 +21,7 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.userModel.find();
+    return (await this.userModel.find()).map((item) => { return { email: item.email} });
   }
 
   async findOne(id: number) {
