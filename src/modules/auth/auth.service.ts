@@ -38,7 +38,8 @@ export class AuthService {
     await this.usersService.create({
       email: createUserDto.email,
       password: passwordHash,
+      role: createUserDto.role
     });
-    return 'This action adds a new user' + createUserDto.email;
+    return 'This action adds a new user ' + createUserDto.email;
   }
 }

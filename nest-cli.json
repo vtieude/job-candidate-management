@@ -13,6 +13,7 @@
         "options": {
           "introspectComments": true,
           "skipAutoHttpCode": true,
+          "classValidatorShim": true,
           "dtoFileNameSuffix": [".dto.ts"] 
         }
       }
