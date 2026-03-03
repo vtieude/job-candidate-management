@@ -12,7 +12,7 @@ export class User extends BaseDoc {
   @Prop({ required: true })
   password!: string;
 
-  @Prop({ required: true, default: UserRole.User, trim: true })
+  @Prop({ required: true, default: UserRole.Candidate, trim: true })
   role!: UserRole;
 
   @Prop({ default: true })

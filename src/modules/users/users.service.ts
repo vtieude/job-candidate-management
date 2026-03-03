@@ -14,14 +14,15 @@ export class UsersService {
   async create(user: CreateUserDto) {
     await this.userModel.create({
       ...user,
-      role: UserRole.User,
+      role: user.role,
       active: true,
     });
     return 'This action adds a new user' + user.email;
   }
 
   async findAll() {
-    return (await this.userModel.find()).map((item) => { return { email: item.email} });
+    const users = (await this.userModel.find()).map((item) => { return { email: item.email} });
+    return users;
   }
 
   async findOne(id: number) {
@@ -30,7 +31,7 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    const userEntity = await this.userModel.findOne({ email });
+    const userEntity = await this.userModel.findOne({ email: email });
     return userEntity;
   }
 
