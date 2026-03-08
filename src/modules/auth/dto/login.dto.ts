@@ -6,3 +6,7 @@ import { BaseUserDto } from '../../../common/dto';
 export class LoginDto extends OmitType(BaseUserDto, ['role'] as const) {
   password!: string;
 }
+
+export class LoginReponseDto {
+  access_token: string
+}

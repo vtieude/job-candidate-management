@@ -1,16 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { SearchJobDto } from './dto/search-job.dto';
+import { JobsDto } from './dto/jobs.dto';
 
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
-  create(@Body() createJobDto: CreateJobDto) {
-    return this.jobsService.create(createJobDto);
+  async create(@Body() createJobDto: CreateJobDto): Promise<string> {
+    await this.jobsService.create(createJobDto);
+    return 'ok';
   }
 
   @Get()
@@ -20,8 +22,13 @@ export class JobsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<JobsDto> {
+    
+    const job = await this.jobsService.findOne(id);
+    if (job) {
+      return job;
+    }
+    throw new NotFoundException('Job not found')
   }
 
   @Patch(':id')
