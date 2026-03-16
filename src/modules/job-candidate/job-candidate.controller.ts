@@ -19,16 +19,16 @@ export class JobCandidateController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.jobCandidateService.findOne(+id);
+    return this.jobCandidateService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateJobCandidateDto: UpdateJobCandidateDto) {
-    return this.jobCandidateService.update(+id, updateJobCandidateDto);
+    return this.jobCandidateService.update(id, updateJobCandidateDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.jobCandidateService.remove(+id);
+    return this.jobCandidateService.remove(id);
   }
 }

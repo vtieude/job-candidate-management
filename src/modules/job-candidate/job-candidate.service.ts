@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateJobCandidateDto } from './dto/create-job-candidate.dto';
 import { UpdateJobCandidateDto } from './dto/update-job-candidate.dto';
 import { JobCandidate } from './schemas/job-candidate.schema';
@@ -11,24 +11,44 @@ export class JobCandidateService {
   constructor(
     @InjectModel(JobCandidate.name) private readonly jobCandidateModel: Model<JobCandidate>,
   ) {}
-  create(createJobCandidateDto: CreateJobCandidateDto) {
-    return 'This action adds a new jobCandidate';
+  async create(createJobCandidateDto: CreateJobCandidateDto) {
+
+    const exist = await this.jobCandidateModel.findOne({
+      job: createJobCandidateDto.job,
+      candidate: createJobCandidateDto.candidate,
+    });
+
+    if (exist) {
+      throw new BadRequestException('Candidate already applied this job');
+    }
+
+    return await this.jobCandidateModel.create(createJobCandidateDto);
   }
 
-  findAll() {
-    return `This action returns all jobCandidate`;
+  async findAll() {
+    return await this.jobCandidateModel
+      .find()
+      .populate('job')
+      .populate('candidate')
+      .lean();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} jobCandidate`;
+  async findOne(id: string) {
+    return await this.jobCandidateModel
+      .findById(id)
+      .populate('job')
+      .populate('candidate');
   }
 
-  update(id: number, updateJobCandidateDto: UpdateJobCandidateDto) {
-    return `This action updates a #${id} jobCandidate`;
+  async update(id: string, updateJobCandidateDto: UpdateJobCandidateDto) {
+    return await this.jobCandidateModel.updateOne(
+      { _id: id },
+      updateJobCandidateDto,
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} jobCandidate`;
+  async remove(id: string) {
+    return await this.jobCandidateModel.deleteOne({ _id: id });
   }
 
 
