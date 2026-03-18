@@ -41,9 +41,6 @@ export class UsersService {
 
  
   async findOneByEmail(email: string) {
-
-
-
     const userEntity = await this.userModel.findOne({ email });
     return userEntity;
   }
