@@ -11,15 +11,17 @@ export class JobCandidateService {
   constructor(
     @InjectModel(JobCandidate.name) private readonly jobCandidateModel: Model<JobCandidate>,
   ) {}
+
+  //Apply job
   async create(createJobCandidateDto: CreateJobCandidateDto) {
 
     const exist = await this.jobCandidateModel.findOne({
       job: createJobCandidateDto.job,
-      candidate: createJobCandidateDto.candidate,
+      user: createJobCandidateDto.user,
     });
 
     if (exist) {
-      throw new BadRequestException('Candidate already applied this job');
+      throw new BadRequestException('You have already applied for this job');
     }
 
     return await this.jobCandidateModel.create(createJobCandidateDto);
@@ -29,22 +31,34 @@ export class JobCandidateService {
     return await this.jobCandidateModel
       .find()
       .populate('job')
-      .populate('candidate')
+      .populate('user')
       .lean();
   }
 
   async findOne(id: string) {
-    return await this.jobCandidateModel
+    const data = await this.jobCandidateModel
       .findById(id)
       .populate('job')
-      .populate('candidate');
+      .populate('user');
+
+      if (!data) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return data;
   }
 
   async update(id: string, updateJobCandidateDto: UpdateJobCandidateDto) {
-    return await this.jobCandidateModel.updateOne(
+    const updated = await this.jobCandidateModel.findByIdAndUpdate(
       { _id: id },
       updateJobCandidateDto,
+      { new: true },
     );
+    if (!updated) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return updated;
   }
 
   async remove(id: string) {
@@ -52,17 +66,34 @@ export class JobCandidateService {
   }
 
 
-async assignCandidateAndJob(jobId: string, candidateId: string, status: JobCandidateStatusEnum){
-  const existJobCandidate = await this.jobCandidateModel.find({job: jobId, candidate: candidateId, status: status});
+async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateStatusEnum){
+  const existJobCandidate = await this.jobCandidateModel.find({job: jobId, user: userId, status: status});
   if (existJobCandidate) {
     throw new NotFoundException('Candidate already applied');
   }
-  await this.jobCandidateModel.create({
+  return await this.jobCandidateModel.create({
     job: jobId,
-    candidate: candidateId,
+    user: userId,
     status
   })
 }
+
+// RECRUITER: xem candidate theo job
+  async getCandidatesByJob(jobId: string) {
+    return await this.jobCandidateModel
+      .find({ job: jobId })
+      .populate('user', 'email role')
+      .populate('job', 'title')
+      .lean();
+  }
+
+// CANDIDATE: xem job đã apply
+  async getByUser(userId: string) {
+    return await this.jobCandidateModel
+      .find({ user: userId })
+      .populate('job', 'title salary')
+      .lean();
+  }
 
   async getAllActiveCandidates (jobId: string) {
     const activeCounts = await this.jobCandidateModel.aggregate([{
@@ -70,14 +101,14 @@ async assignCandidateAndJob(jobId: string, candidateId: string, status: JobCandi
     },
     {
       $lookup: {
-        from: "candidates",        // Candidate collection
-        localField: "candidate",
+        from: "user",        // Candidate collection
+        localField: "user",
         foreignField: "_id",
-        as: "candidateDoc"
+        as: "userDoc"
       }
     },
-    { $unwind: "$candidateDoc" },
-    { $match: { "candidateDoc.status": CandidateStatusEnum.Active } },
+    { $unwind: "$userDoc" },
+    { $match: { "userDoc.status": CandidateStatusEnum.Active } },
     { $count: "activeCount" }
     ])
     console.log(activeCounts);

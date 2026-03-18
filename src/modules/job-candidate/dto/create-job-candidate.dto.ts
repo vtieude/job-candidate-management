@@ -7,7 +7,7 @@ export class CreateJobCandidateDto {
   job: string;
 
   @IsMongoId()
-  candidate: string;
+  user: string;
 
   @IsEnum(JobCandidateStatusEnum)
   status: JobCandidateStatusEnum;
