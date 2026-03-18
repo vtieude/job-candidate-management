@@ -5,6 +5,7 @@ import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { UserRole } from '../../common/enums';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,8 +21,8 @@ export class UsersService {
     return 'This action adds a new user' + user.email;
   }
 
-  async findAll() {
-    const users = (await this.userModel.find()).map((item) => { return { email: item.email} });
+  async findAll(): Promise<UserDto[]> {
+    const users = await this.userModel.find().select("-password ");
     return users;
   }
 
@@ -30,6 +31,15 @@ export class UsersService {
     return userEntity;
   }
 
+
+   async updateUSer(user: User) {
+    const userEntity = await this.userModel.updateOne({ where: { id: user._id } }, user);
+    console.log(2);
+    return userEntity;
+  }
+
+
+ 
   async findOneByEmail(email: string) {
     const userEntity = await this.userModel.findOne({ email });
     return userEntity;

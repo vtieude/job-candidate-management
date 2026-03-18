@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateJobCandidateDto } from './dto/create-job-candidate.dto';
 import { UpdateJobCandidateDto } from './dto/update-job-candidate.dto';
 import { JobCandidate } from './schemas/job-candidate.schema';
@@ -11,38 +11,89 @@ export class JobCandidateService {
   constructor(
     @InjectModel(JobCandidate.name) private readonly jobCandidateModel: Model<JobCandidate>,
   ) {}
-  create(createJobCandidateDto: CreateJobCandidateDto) {
-    return 'This action adds a new jobCandidate';
+
+  //Apply job
+  async create(createJobCandidateDto: CreateJobCandidateDto) {
+
+    const exist = await this.jobCandidateModel.findOne({
+      job: createJobCandidateDto.job,
+      user: createJobCandidateDto.user,
+    });
+
+    if (exist) {
+      throw new BadRequestException('You have already applied for this job');
+    }
+
+    return await this.jobCandidateModel.create(createJobCandidateDto);
   }
 
-  findAll() {
-    return `This action returns all jobCandidate`;
+  async findAll() {
+    return await this.jobCandidateModel
+      .find()
+      .populate('job')
+      .populate('user')
+      .lean();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} jobCandidate`;
+  async findOne(id: string) {
+    const data = await this.jobCandidateModel
+      .findById(id)
+      .populate('job')
+      .populate('user');
+
+      if (!data) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return data;
   }
 
-  update(id: number, updateJobCandidateDto: UpdateJobCandidateDto) {
-    return `This action updates a #${id} jobCandidate`;
+  async update(id: string, updateJobCandidateDto: UpdateJobCandidateDto) {
+    const updated = await this.jobCandidateModel.findByIdAndUpdate(
+      { _id: id },
+      updateJobCandidateDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} jobCandidate`;
+  async remove(id: string) {
+    return await this.jobCandidateModel.deleteOne({ _id: id });
   }
 
 
-async assignCandidateAndJob(jobId: string, candidateId: string, status: JobCandidateStatusEnum){
-  const existJobCandidate = await this.jobCandidateModel.find({job: jobId, candidate: candidateId, status: status});
+async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateStatusEnum){
+  const existJobCandidate = await this.jobCandidateModel.find({job: jobId, user: userId, status: status});
   if (existJobCandidate) {
     throw new NotFoundException('Candidate already applied');
   }
-  await this.jobCandidateModel.create({
+  return await this.jobCandidateModel.create({
     job: jobId,
-    candidate: candidateId,
+    user: userId,
     status
   })
 }
+
+// RECRUITER: xem candidate theo job
+  async getCandidatesByJob(jobId: string) {
+    return await this.jobCandidateModel
+      .find({ job: jobId })
+      .populate('user', 'email role')
+      .populate('job', 'title')
+      .lean();
+  }
+
+// CANDIDATE: xem job đã apply
+  async getByUser(userId: string) {
+    return await this.jobCandidateModel
+      .find({ user: userId })
+      .populate('job', 'title salary')
+      .lean();
+  }
 
   async getAllActiveCandidates (jobId: string) {
     const activeCounts = await this.jobCandidateModel.aggregate([{
@@ -50,14 +101,14 @@ async assignCandidateAndJob(jobId: string, candidateId: string, status: JobCandi
     },
     {
       $lookup: {
-        from: "candidates",        // Candidate collection
-        localField: "candidate",
+        from: "user",        // Candidate collection
+        localField: "user",
         foreignField: "_id",
-        as: "candidateDoc"
+        as: "userDoc"
       }
     },
-    { $unwind: "$candidateDoc" },
-    { $match: { "candidateDoc.status": CandidateStatusEnum.Active } },
+    { $unwind: "$userDoc" },
+    { $match: { "userDoc.status": CandidateStatusEnum.Active } },
     { $count: "activeCount" }
     ])
     console.log(activeCounts);

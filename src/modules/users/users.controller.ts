@@ -17,7 +17,7 @@ import { Public, Roles } from '../../common/decorators';
 import { ApiPaginatedResponse } from '../../common/swaggers/paginated.decorators';
 import { UserRole } from '../../common/enums';
 import { UserPayloadRequest } from '../../common/dto';
-import { Ctx } from '../../common/decorators/user.decorator';
+import { CurrentUser } from '../../common/decorators/user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -62,12 +62,13 @@ export class UsersController {
 
 
   @Get()
+  @Roles(UserRole.Admin) //Authen
   async getAllUsers() {
     return await this.usersService.findAll();
   }
 
   @Get('/me')
-  public async getProfile(@Ctx() user: UserPayloadRequest) {
+  public async getProfile(@CurrentUser() user: UserPayloadRequest) {
     return await this.usersService.findOneByEmail(user.email);
   }
 }

@@ -4,17 +4,19 @@ import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { JobCandidateStatusEnum } from '../../../common/enums';
 import { BaseDoc } from '../../schemas/base.schema';
 import { Job } from '../../jobs/schemas/job.schema';
-import { Candidate } from '../../candidates/schemas/candidate.schema';
+import { User } from '../../users/schemas/user.schema';
 
 @Schema({ timestamps: true, collection: 'job_candidate' })
 export class JobCandidate extends BaseDoc {
   @Prop({ default: JobCandidateStatusEnum.Interview })
   status!: JobCandidateStatusEnum;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Candidate' }) 
-  candidate: Types.ObjectId | Candidate; 
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' }) 
+  user: Types.ObjectId | User; 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }) 
   job: Types.ObjectId | Job; 
 }
 export type JobCandidateDocument = HydratedDocument<JobCandidate>;
 export const JobCandidateSchema = SchemaFactory.createForClass(JobCandidate);
 
+// chống apply trùng
+JobCandidateSchema.index({ user: 1, job: 1 }, { unique: true });
