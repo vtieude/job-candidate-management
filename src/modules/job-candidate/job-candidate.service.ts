@@ -10,6 +10,7 @@ import { CandidateStatusEnum, JobCandidateStatusEnum } from '../../common/enums'
 export class JobCandidateService {
   constructor(
     @InjectModel(JobCandidate.name) private readonly jobCandidateModel: Model<JobCandidate>,
+    @InjectModel('Job') private readonly jobModel: Model<any>,
   ) {}
 
   //Apply job
@@ -17,7 +18,7 @@ export class JobCandidateService {
 
     const exist = await this.jobCandidateModel.findOne({
       job: createJobCandidateDto.job,
-      user: createJobCandidateDto.user,
+      // user: createJobCandidateDto.user,
     });
 
     if (exist) {
@@ -30,8 +31,8 @@ export class JobCandidateService {
   async findAll() {
     return await this.jobCandidateModel
       .find()
-      .populate('job')
-      .populate('user')
+      .populate('job', 'title company')
+      .populate('user', 'email name')
       .lean();
   }
 
@@ -39,7 +40,7 @@ export class JobCandidateService {
     const data = await this.jobCandidateModel
       .findById(id)
       .populate('job')
-      .populate('user');
+      .populate('user', 'email name');
 
       if (!data) {
       throw new NotFoundException('Application not found');
@@ -68,7 +69,7 @@ export class JobCandidateService {
 
 async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateStatusEnum){
   const existJobCandidate = await this.jobCandidateModel.find({job: jobId, user: userId, status: status});
-  if (existJobCandidate) {
+  if (existJobCandidate.length > 0) {
     throw new NotFoundException('Candidate already applied');
   }
   return await this.jobCandidateModel.create({
@@ -79,9 +80,22 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
 }
 
 // RECRUITER: xem candidate theo job
-  async getCandidatesByJob(jobId: string) {
+  async getCandidatesByJob(jobId: string, userId: string) {
+    // 1. check job tồn tại
+    const job = await this.jobModel.findById(jobId);
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    // 2. check quyền 
+    if (job.createdBy.toString() !== userId) {
+      throw new BadRequestException('You are not allowed to view this job');
+    }
+
+    // 3. Lấy Candidate
     return await this.jobCandidateModel
-      .find({ job: jobId })
+      .find({ job: new Types.ObjectId(jobId) })
       .populate('user', 'email role')
       .populate('job', 'title')
       .lean();
@@ -90,8 +104,8 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
 // CANDIDATE: xem job đã apply
   async getByUser(userId: string) {
     return await this.jobCandidateModel
-      .find({ user: userId })
-      .populate('job', 'title salary')
+      .find({ user: new Types.ObjectId(userId) })
+      .select('job')
       .lean();
   }
 
@@ -101,7 +115,7 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
     },
     {
       $lookup: {
-        from: "user",        // Candidate collection
+        from: "users",        // Candidate collection
         localField: "user",
         foreignField: "_id",
         as: "userDoc"

@@ -6,14 +6,16 @@ import { SearchJobDto } from './dto/search-job.dto';
 import { JobsDto } from './dto/jobs.dto';
 import { UserRole } from '../../common/enums';
 import { Public, Roles } from '../../common/decorators';
+import { CurrentUser } from '../../common/decorators/user.decorator';
 
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
-  async create(@Body() createJobDto: CreateJobDto): Promise<string> {
-    await this.jobsService.create(createJobDto);
+  @Roles(UserRole.Recruiter)
+  async create(@Body() createJobDto: CreateJobDto, @CurrentUser('userId') userId: string,): Promise<string> {
+    await this.jobsService.create(createJobDto, userId);
     return 'ok';
   }
 
@@ -25,22 +27,22 @@ export class JobsController {
   }
 
   @Get(':id')
+  @Public()
   async findOne(@Param('id') id: string): Promise<JobsDto> {
     
     const job = await this.jobsService.findOne(id);
-    if (job) {
-      return job;
-    }
-    throw new NotFoundException('Job not found')
+    return job;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJobDto: UpdateJobDto) {
-    return this.jobsService.update(id, updateJobDto);
+  @Roles(UserRole.Recruiter)
+  update(@Param('id') id: string, @Body() updateJobDto: UpdateJobDto, @CurrentUser('userId') userId: string) {
+    return this.jobsService.update(id, updateJobDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobsService.remove(id);
+  @Roles(UserRole.Recruiter)
+  remove(@Param('id') id: string, @CurrentUser('userId') userId: string) { // CurrentUser: kiểm tra quyền sở hữu
+    return this.jobsService.remove(id, userId);
   }
 }
