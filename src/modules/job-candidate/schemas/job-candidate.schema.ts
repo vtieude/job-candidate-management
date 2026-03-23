@@ -8,7 +8,11 @@ import { User } from '../../users/schemas/user.schema';
 
 @Schema({ timestamps: true, collection: 'job_candidate' })
 export class JobCandidate extends BaseDoc {
-  @Prop({ default: JobCandidateStatusEnum.Interview })
+  @Prop({ 
+    type: String, 
+    enum: JobCandidateStatusEnum, 
+    default: JobCandidateStatusEnum.Applied // Nên để mặc định là Pending khi mới apply
+   })
   status!: JobCandidateStatusEnum;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' }) 
   user: Types.ObjectId | User; 

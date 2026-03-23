@@ -1,22 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards} from '@nestjs/common';
 import { JobCandidateService } from './job-candidate.service';
 import { CreateJobCandidateDto } from './dto/create-job-candidate.dto';
 import { UpdateJobCandidateDto } from './dto/update-job-candidate.dto';
 import { Roles } from '../../common/decorators';
 import { UserRole } from '../../common/enums';
 import { CurrentUser } from '../../common/decorators/user.decorator';
+import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 
+@UseGuards(JwtAuthGuard, RolesGuard) //
 @Controller('job-candidate')
 export class JobCandidateController {
   constructor(private readonly jobCandidateService: JobCandidateService) {}
 
   @Post()
   @Roles(UserRole.Candidate ) // apply job
-  applyJobs(@Body() createJobCandidateDto: CreateJobCandidateDto, @CurrentUser('userId') userId: string,) {
-    return this.jobCandidateService.create({
-      ...createJobCandidateDto,
-      user: userId,
-    });
+  async applyJobs(@Body() createJobCandidateDto: CreateJobCandidateDto, @CurrentUser('userId') userId: string,) {
+    return this.jobCandidateService.apllyJobs(createJobCandidateDto, userId );
+  }
+
+  // candidate xem job đã apply
+  @Get('me')
+  @Roles(UserRole.Candidate)
+  getMyApplications(@CurrentUser('userId') userId: string) {
+    if (!userId) {
+      throw new BadRequestException("UserId is missing");
+    }
+    return this.jobCandidateService.getByUser(userId);
   }
 
   @Get()
@@ -32,7 +41,7 @@ export class JobCandidateController {
 
   @Patch(':id')
   @Roles(UserRole.Recruiter)
-  update(@Param('id') id: string, @Body() updateJobCandidateDto: UpdateJobCandidateDto) {
+  updateStatus(@Param('id') id: string, @Body() updateJobCandidateDto: UpdateJobCandidateDto) {
     return this.jobCandidateService.update(id, updateJobCandidateDto);
   }
 
@@ -44,15 +53,9 @@ export class JobCandidateController {
   // recruiter xem list candidate theo job
   @Get('job/:jobId')
   @Roles(UserRole.Recruiter)
-  getCandidatesByJob(@Param('jobId') jobId: string) {
-    return this.jobCandidateService.getCandidatesByJob(jobId);
+  getCandidatesByJob(@Param('jobId') jobId: string, @CurrentUser('userId') userId: string,) {
+    return this.jobCandidateService.getCandidatesByJob(jobId, userId);
   }
 
-  // candidate xem job đã apply
-  @Get('me')
-  @Roles(UserRole.Candidate)
-  getMyApplications(@CurrentUser('userId') userId: string) {
-    return this.jobCandidateService.getByUser(userId);
-  }
 }
 

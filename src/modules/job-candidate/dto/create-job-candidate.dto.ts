@@ -1,4 +1,4 @@
-import { IsMongoId, IsEnum } from 'class-validator';
+import { IsMongoId, IsEnum, IsOptional } from 'class-validator';
 import { JobCandidateStatusEnum } from '../../../common/enums';
 
 export class CreateJobCandidateDto {
@@ -6,9 +6,7 @@ export class CreateJobCandidateDto {
   @IsMongoId()
   job: string;
 
-  @IsMongoId()
-  user: string;
-
+  @IsOptional()
   @IsEnum(JobCandidateStatusEnum)
   status: JobCandidateStatusEnum;
 

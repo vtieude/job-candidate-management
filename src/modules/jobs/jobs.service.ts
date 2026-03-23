@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './schemas/job.schema';
@@ -10,8 +10,11 @@ export class JobsService {
   constructor(
     @InjectModel(Job.name) private readonly jobModel: Model<JobDocument>,
   ) {}
-  create(createJobDto: CreateJobDto) {
-    return 'This action adds a new job';
+  async create(createJobDto: CreateJobDto, userId: string) {
+    return await this.jobModel.create ({
+      ...createJobDto,
+      createdBy: userId,
+    });
   }
 
   async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number) {
@@ -33,14 +36,26 @@ export class JobsService {
   }
 
   async findOne(id: string) {
-    return await this.jobModel.findById(id);
+    const job = await this.jobModel.findById(id).populate('createdBy', 'name email');
+    if (!job) throw new NotFoundException('Job not found');
+    return job;
   }
 
-  async update(_id: string, updateJobDto: UpdateJobDto) {
-    return await this.jobModel.updateOne({_id}, updateJobDto);
+  async update(_id: string, updateJobDto: UpdateJobDto, userId: string) {
+    const job = await this.findOne(_id);
+    // Kiểm tra nếu không phải chủ sở hữu thì không được sửa
+    if (job.createdBy['_id'].toString() !== userId) {
+      throw new ForbiddenException('You can only update your own jobs');
+    }
+    return await this.jobModel.findByIdAndUpdate({_id}, updateJobDto, { new: true});
   }
 
-  async remove(_id: string) {
+  async remove(_id: string, userId: string) {
+    const job = await this.findOne(_id);
+    // Kiểm tra nếu không phải chủ sở hữu thì không được xóa
+    if (job.createdBy['_id'].toString() !== userId) {
+      throw new ForbiddenException('You can only delete your own jobs');
+    }
     return await this.jobModel.deleteOne({ _id});
   }
 }
