@@ -14,11 +14,11 @@ export class JobCandidateService {
   ) {}
 
   //Apply job
-  async create(createJobCandidateDto: CreateJobCandidateDto) {
+  async apllyJobs(createJobCandidateDto: CreateJobCandidateDto, userId: string) {
 
     const exist = await this.jobCandidateModel.findOne({
       job: createJobCandidateDto.job,
-      // user: createJobCandidateDto.user,
+      user: userId,
     });
 
     if (exist) {

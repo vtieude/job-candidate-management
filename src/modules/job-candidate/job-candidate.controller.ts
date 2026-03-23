@@ -15,10 +15,7 @@ export class JobCandidateController {
   @Post()
   @Roles(UserRole.Candidate ) // apply job
   async applyJobs(@Body() createJobCandidateDto: CreateJobCandidateDto, @CurrentUser('userId') userId: string,) {
-    return this.jobCandidateService.create({
-      ...createJobCandidateDto,
-      user: userId,
-    } as any );
+    return this.jobCandidateService.apllyJobs(createJobCandidateDto, userId );
   }
 
   // candidate xem job đã apply
