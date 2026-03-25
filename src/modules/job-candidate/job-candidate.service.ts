@@ -25,7 +25,7 @@ export class JobCandidateService {
       throw new BadRequestException('You have already applied for this job');
     }
 
-    return await this.jobCandidateModel.create(createJobCandidateDto);
+    return await this.jobCandidateModel.create({...createJobCandidateDto, user: userId});
   }
 
   async findAll() {
@@ -102,11 +102,12 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
   }
 
 // CANDIDATE: xem job đã apply
-  async getByUser(userId: string) {
-    return await this.jobCandidateModel
+  async getJobsAppliedByUser(userId: string) {
+    const jobs = await this.jobCandidateModel
       .find({ user: new Types.ObjectId(userId) })
       .select('job')
       .lean();
+    return jobs.filter((job) => job.job).map((job) => job.job.toString());
   }
 
   async getAllActiveCandidates (jobId: string) {

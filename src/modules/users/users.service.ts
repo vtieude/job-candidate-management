@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
-import { UserRole } from '../../common/enums';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDto } from './dto/user.dto';
@@ -32,10 +31,24 @@ export class UsersService {
   }
 
 
-   async updateUSer(user: User) {
-    const userEntity = await this.userModel.updateOne({ where: { id: user._id } }, user);
-    console.log(2);
-    return userEntity;
+   async updateProfile(userId: string, dto: UpdateUserDto) {
+    // check email trùng
+    if (dto.email) {
+      const exist = await this.userModel.findOne({ email: dto.email });
+      if (exist && exist._id.toString() !== userId) {
+        throw new BadRequestException('Email already exists');
+      }
+    }
+
+    const updated = await this.userModel.findByIdAndUpdate(
+      userId,
+      dto,
+      { new: true },
+    ).select('-password');
+
+    if (!updated) throw new NotFoundException('User not found');
+
+    return updated;
   }
 
 

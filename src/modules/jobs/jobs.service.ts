@@ -4,11 +4,14 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './schemas/job.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { JobCandidate, JobCandidateDocument } from '../job-candidate/schemas/job-candidate.schema';
+import { JobsDto } from './dto/jobs.dto';
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectModel(Job.name) private readonly jobModel: Model<JobDocument>,
+    @InjectModel(JobCandidate.name) private readonly JobCandidateModel: Model<JobCandidateDocument>,
   ) {}
   async create(createJobDto: CreateJobDto, userId: string) {
     return await this.jobModel.create ({
@@ -17,7 +20,24 @@ export class JobsService {
     });
   }
 
-  async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number) {
+  private toDto(job: any, isApplied = false): JobsDto {
+    return {
+      _id: job._id.toString(),
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      status: job.status,
+      salaryMin: job.salaryMin,
+      salaryMax: job.salaryMax,
+      description: job.description,
+      createdAt: job.createdAt?.toISOString(),
+      updatedAt: job.updatedAt?.toISOString(),
+      isApplied,
+      createdBy: job.createdBy?.toString?.() ?? job.createdBy,
+    };
+  }
+
+  async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number, userId?: string): Promise<JobsDto[]> {
     // Text search on title, company, description
     const filter: any = {};
     if (!!q) {
@@ -31,29 +51,59 @@ export class JobsService {
       if (minSalary !== undefined) filter.$and.push({salaryMin: { $gte: minSalary }});
       if (maxSalary !== undefined) filter.$and.push({salaryMax: { $lte: maxSalary }});
     }
-    console.log(q)
-    return await this.jobModel.find(filter).exec();
+
+    const jobs = await this.jobModel.find(filter).exec();
+
+    // Nếu chưa login thì return luôn
+    if (!userId) return jobs.map((job) => this.toDto(job));
+
+    // lấy danh sách job đã apply
+    const appliedJobs = await this.JobCandidateModel.find({
+      userId: userId,
+    });
+
+    const appliedJobIds = new Set(
+      appliedJobs.map((item) => item.job.toString())
+    );
+    
+    return jobs.map((job) =>
+      this.toDto(job, appliedJobIds.has(job._id.toString())),  
+    );
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string): Promise<JobsDto> {
     const job = await this.jobModel.findById(id).populate('createdBy', 'name email');
     if (!job) throw new NotFoundException('Job not found');
-    return job;
+
+    let isApplied = false;
+
+    if (userId) {
+      const applied = await this.JobCandidateModel.findOne({
+        userId,
+        job: id,
+      });
+
+      isApplied = !!applied;
+    }
+
+    return this.toDto(job, isApplied);
   }
 
   async update(_id: string, updateJobDto: UpdateJobDto, userId: string) {
-    const job = await this.findOne(_id);
+    const job = await this.jobModel.findById(_id);
+    if (!job) throw new NotFoundException('Job not found');
     // Kiểm tra nếu không phải chủ sở hữu thì không được sửa
-    if (job.createdBy['_id'].toString() !== userId) {
+    if (job.createdBy.toString() !== userId) {
       throw new ForbiddenException('You can only update your own jobs');
     }
     return await this.jobModel.findByIdAndUpdate({_id}, updateJobDto, { new: true});
   }
 
   async remove(_id: string, userId: string) {
-    const job = await this.findOne(_id);
+    const job = await this.jobModel.findById(_id);
+    if (!job) throw new NotFoundException('Job not found');
     // Kiểm tra nếu không phải chủ sở hữu thì không được xóa
-    if (job.createdBy['_id'].toString() !== userId) {
+    if (job.createdBy.toString() !== userId) {
       throw new ForbiddenException('You can only delete your own jobs');
     }
     return await this.jobModel.deleteOne({ _id});

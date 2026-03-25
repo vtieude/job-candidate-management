@@ -12,11 +12,17 @@ export class User extends BaseDoc {
   @Prop({ required: true })
   password!: string;
 
-  @Prop({ required: true, default: UserRole.Candidate, trim: true })
+  @Prop({ required: true, enum: UserRole, default: UserRole.Candidate,})
   role!: UserRole;
 
   @Prop({ default: true })
   active!: boolean;
+
+  @Prop({ trim: true })
+  fullName?: string;
+
+  @Prop()
+  phone?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
