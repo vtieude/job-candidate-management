@@ -25,8 +25,9 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: number) {
-    const userEntity = await this.userModel.findOne({ where: { id } });
+  async findOne(id: string) {
+    const userEntity = await this.userModel.findById(id).select('-password');
+    if (!userEntity) throw new NotFoundException('User not found');
     return userEntity;
   }
 
@@ -42,7 +43,7 @@ export class UsersService {
 
     const updated = await this.userModel.findByIdAndUpdate(
       userId,
-      dto,
+      { $set: dto },
       { new: true },
     ).select('-password');
 

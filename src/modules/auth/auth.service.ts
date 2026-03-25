@@ -25,7 +25,7 @@ export class AuthService {
     // Logic generate token here
     const payload: UserPayloadRequest = {
       email: user.email,
-      userId: user.id.toString(),
+      userId: user._id.toString(),
       role: user.role,
     };
     return {
