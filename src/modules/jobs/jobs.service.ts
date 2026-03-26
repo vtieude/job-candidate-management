@@ -9,6 +9,7 @@ import { JobCandidateService } from '../job-candidate/job-candidate.service';
 
 @Injectable()
 export class JobsService {
+  JobCandidateModel: any;
   constructor(
     @InjectModel(Job.name) private readonly jobModel: Model<JobDocument>,
     private readonly jobCandidateService: JobCandidateService,
@@ -58,7 +59,7 @@ export class JobsService {
     if (!userId) return jobs.map((job) => this.toDto(job));
 
     // lấy danh sách job đã apply
-    const appliedJobIds = await this.jobCandidateService.getJobsAppliedByUser(userId);
+    const appliedJobIds = await this.jobCandidateService.getJobIdsAppliedByUser(userId);
     const appliedJobIdsSet = new Set(appliedJobIds);
     
     return jobs.map((job) =>
@@ -73,7 +74,7 @@ export class JobsService {
     let isApplied = false;
 
     if (userId) {
-      const appliedJobIds = await this.jobCandidateService.getJobsAppliedByUser(userId);
+      const appliedJobIds = await this.jobCandidateService.getJobIdsAppliedByUser(userId);
       isApplied = appliedJobIds.includes(id);
     }
 

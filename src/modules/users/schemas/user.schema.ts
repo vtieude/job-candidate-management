@@ -4,9 +4,16 @@ import { HydratedDocument } from 'mongoose';
 import { UserRole } from '../../../common/enums';
 import { BaseDoc } from '../../schemas/base.schema';
 
+export enum UserLevel {
+  Intern = 'intern',
+  Junior = 'junior',
+  Middle = 'middle',
+  Senior = 'senior',
+}
+
 @Schema({ timestamps: true, collection: 'users' })
 export class User extends BaseDoc {
-  @Prop({ required: true, lowercase: true, trim: true })
+  @Prop({ required: true, lowercase: true, trim: true,})
   email!: string;
 
   @Prop({ required: true })
@@ -23,6 +30,9 @@ export class User extends BaseDoc {
 
   @Prop()
   phone?: string;
+
+  @Prop({ enum: UserLevel, default: UserLevel.Intern,})
+  level?: UserLevel;
 }
 
 export type UserDocument = HydratedDocument<User>;

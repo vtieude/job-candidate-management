@@ -45,11 +45,6 @@ export class UsersController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
-  }
-
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
@@ -79,5 +74,10 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
   ) {
     return await this.usersService.updateProfile(user.userId, dto);
-}
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
 }

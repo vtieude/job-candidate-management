@@ -8,6 +8,7 @@ import { CandidateStatusEnum, JobCandidateStatusEnum } from '../../common/enums'
 import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/schemas/user.schema';
 import { Job } from '../jobs/schemas/job.schema';
+import { JobsDto } from '../jobs/dto/jobs.dto';
 
 @Injectable()
 export class JobCandidateService {
@@ -171,12 +172,22 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
   }
 
 // CANDIDATE: xem job đã apply
-  async getJobsAppliedByUser(userId: string) {
+  async getJobIdsAppliedByUser(userId: string): Promise<string[]> {
     const jobs = await this.jobCandidateModel
       .find({ user: new Types.ObjectId(userId) })
-      .select('job')
+      .sort({ createdAt: -1 })
       .lean();
     return jobs.filter((job) => job.job).map((job) => job.job.toString());
+  }
+
+  async getJobsAppliedByUser(userId: string): Promise<JobsDto[]> {
+    const jobs = await this.jobCandidateModel
+      .find({ user: new Types.ObjectId(userId) })
+      .populate('job', 'title company location salaryMin salaryMax')
+      .select('job status createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    return jobs.filter((job) => job.job).map((job) => job.job as unknown as JobsDto);
   }
 
   async getAllActiveCandidates (jobId: string) {
