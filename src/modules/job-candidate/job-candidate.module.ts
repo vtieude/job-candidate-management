@@ -18,6 +18,6 @@ import { NotificationsModule } from '../notifications/notifications.module';
   ],
   controllers: [JobCandidateController],
   providers: [JobCandidateService],
-  exports: [MongooseModule],
+  exports: [JobCandidateService],
 })
 export class JobCandidateModule {}
