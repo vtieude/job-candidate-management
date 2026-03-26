@@ -12,6 +12,7 @@ import { Connection } from 'mongoose';
 import { CandidatesModule } from './modules/candidates/candidates.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobCandidateModule } from './modules/job-candidate/job-candidate.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -38,6 +39,7 @@ import { AppController } from './app.controller';
     CandidatesModule,
     JobsModule,
     JobCandidateModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

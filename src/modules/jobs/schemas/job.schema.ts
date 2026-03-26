@@ -35,5 +35,3 @@ export class Job extends BaseDoc {
 }
 export type JobDocument = HydratedDocument<Job>;
 export const JobSchema = SchemaFactory.createForClass(Job);
-
-JobSchema.index({ email: 1 }, { unique: true });
