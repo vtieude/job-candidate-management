@@ -17,5 +17,6 @@ import { JobCandidateModule } from '../job-candidate/job-candidate.module';
   ],
   controllers: [JobsController],
   providers: [JobsService],
+  exports: [JobsService],
 })
 export class JobsModule {}

@@ -5,14 +5,16 @@ import { JobCandidate } from './schemas/job-candidate.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CandidateStatusEnum, JobCandidateStatusEnum } from '../../common/enums';
-import { JobsDto } from '../jobs/dto/jobs.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { User } from '../users/schemas/user.schema';
 import { Job } from '../jobs/schemas/job.schema';
+import { JobsDto } from '../jobs/dto/jobs.dto';
 
 @Injectable()
 export class JobCandidateService {
   constructor(
     @InjectModel(JobCandidate.name) private readonly jobCandidateModel: Model<JobCandidate>,
-    @InjectModel('Job') private readonly jobModel: Model<any>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   //Apply job
@@ -27,7 +29,31 @@ export class JobCandidateService {
       throw new BadRequestException('You have already applied for this job');
     }
 
-    return await this.jobCandidateModel.create({...createJobCandidateDto, user: userId});
+    const jobCandidate = await this.jobCandidateModel.create({...createJobCandidateDto, user: userId});
+
+    // Get job details to send notification
+    const jobCandidateUser = await this.jobCandidateModel
+      .findById(jobCandidate._id)
+      .populate('job', 'title createdBy')
+      .populate('user', '_id fullName email')
+      .lean().exec();
+    if (jobCandidateUser && jobCandidateUser.user) {
+      const user = jobCandidateUser.user as User;
+      const job = jobCandidateUser.job as Job;
+      const candidateName =user.fullName || user.email;
+        
+        // Create notification for recruiter
+        await this.notificationsService.createJobApplicationNotification(
+          userId,
+          job.createdBy._id.toString(),
+          createJobCandidateDto.job,
+          jobCandidate._id.toString(),
+          job.title,
+          candidateName,
+        );
+    }
+
+    return jobCandidate;
   }
 
   async findAll() {
@@ -52,13 +78,59 @@ export class JobCandidateService {
   }
 
   async update(id: string, updateJobCandidateDto: UpdateJobCandidateDto) {
+    const jobCandidate = await this.jobCandidateModel
+      .findById(id)
+      .populate('job', 'title createdBy')
+      .populate('user', '_id fullName email');
+
+    if (!jobCandidate) {
+      throw new NotFoundException('Application not found');
+    }
+
+    const previousStatus = jobCandidate.status;
+    
     const updated = await this.jobCandidateModel.findByIdAndUpdate(
       { _id: id },
       updateJobCandidateDto,
       { new: true },
     );
-    if (!updated) {
-      throw new NotFoundException('Application not found');
+
+    // Send notification if status changed
+    if (updateJobCandidateDto.status && updateJobCandidateDto.status !== previousStatus) {
+      const job = jobCandidate.job as any;
+      const user = jobCandidate.user as any;
+      const candidateId = user._id.toString();
+      const recruiterId = job.createdBy.toString();
+
+      switch (updateJobCandidateDto.status) {
+        case JobCandidateStatusEnum.Approved:
+          await this.notificationsService.createApplicationApprovedNotification(
+            candidateId,
+            recruiterId,
+            job._id.toString(),
+            id,
+            job.title,
+          );
+          break;
+        case JobCandidateStatusEnum.Rejected:
+          await this.notificationsService.createApplicationRejectedNotification(
+            candidateId,
+            recruiterId,
+            job._id.toString(),
+            id,
+            job.title,
+          );
+          break;
+        case JobCandidateStatusEnum.Interview:
+          await this.notificationsService.createInterviewNotification(
+            candidateId,
+            recruiterId,
+            job._id.toString(),
+            id,
+            job.title,
+          );
+          break;
+      }
     }
 
     return updated;
@@ -83,24 +155,20 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
 
 // RECRUITER: xem candidate theo job
   async getCandidatesByJob(jobId: string, userId: string) {
-    // 1. check job tồn tại
-    const job = await this.jobModel.findById(jobId);
-
-    if (!job) {
-      throw new NotFoundException('Job not found');
-    }
-
-    // 2. check quyền 
-    if (job.createdBy.toString() !== userId) {
-      throw new BadRequestException('You are not allowed to view this job');
-    }
-
-    // 3. Lấy Candidate
-    return await this.jobCandidateModel
+    const jobCandidates = await this.jobCandidateModel
       .find({ job: new Types.ObjectId(jobId) })
       .populate('user', 'email role')
-      .populate('job', 'title')
+      .populate('job', 'title createdBy')
       .lean();
+    if (jobCandidates.length === 0) {
+      throw new NotFoundException('Job not found');
+    }
+    const createJobs = jobCandidates[0].job as Job;
+    // 2. check quyền 
+    if (createJobs.createdBy.toString() !== userId) {
+      throw new BadRequestException('You are not allowed to view this job');
+    }
+    return jobCandidates;
   }
 
 // CANDIDATE: xem job đã apply

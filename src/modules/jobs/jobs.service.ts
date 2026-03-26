@@ -6,12 +6,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JobCandidate, JobCandidateDocument } from '../job-candidate/schemas/job-candidate.schema';
 import { JobsDto } from './dto/jobs.dto';
+import { JobCandidateService } from '../job-candidate/job-candidate.service';
 
 @Injectable()
 export class JobsService {
+  JobCandidateModel: any;
   constructor(
     @InjectModel(Job.name) private readonly jobModel: Model<JobDocument>,
-    @InjectModel(JobCandidate.name) private readonly JobCandidateModel: Model<JobCandidateDocument>,
+    private readonly jobCandidateService: JobCandidateService,
   ) {}
   async create(createJobDto: CreateJobDto, userId: string) {
     return await this.jobModel.create ({
@@ -63,7 +65,7 @@ export class JobsService {
     });
 
     const appliedJobIds = new Set(
-      appliedJobs.map((item) => item.job.toString())
+      appliedJobs.map((item: { job: { toString: () => any; }; }) => item.job.toString())
     );
     
     return jobs.map((job) =>

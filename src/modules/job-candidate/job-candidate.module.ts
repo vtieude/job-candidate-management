@@ -4,6 +4,7 @@ import { JobCandidateController } from './job-candidate.controller';
 import { JobCandidate, JobCandidateSchema } from './schemas/job-candidate.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Job, JobSchema } from '../jobs/schemas/job.schema';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -11,12 +12,9 @@ import { Job, JobSchema } from '../jobs/schemas/job.schema';
       {
         name: JobCandidate.name,
         schema: JobCandidateSchema,
-      },
-      {
-        name: Job.name,
-        schema: JobSchema,
       }
     ]),
+    NotificationsModule,
   ],
   controllers: [JobCandidateController],
   providers: [JobCandidateService],
