@@ -4,14 +4,14 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './schemas/job.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { JobCandidate, JobCandidateDocument } from '../job-candidate/schemas/job-candidate.schema';
 import { JobsDto } from './dto/jobs.dto';
+import { JobCandidateService } from '../job-candidate/job-candidate.service';
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectModel(Job.name) private readonly jobModel: Model<JobDocument>,
-    @InjectModel(JobCandidate.name) private readonly JobCandidateModel: Model<JobCandidateDocument>,
+    private readonly jobCandidateService: JobCandidateService,
   ) {}
   async create(createJobDto: CreateJobDto, userId: string) {
     return await this.jobModel.create ({
@@ -58,16 +58,11 @@ export class JobsService {
     if (!userId) return jobs.map((job) => this.toDto(job));
 
     // lấy danh sách job đã apply
-    const appliedJobs = await this.JobCandidateModel.find({
-      userId: userId,
-    });
-
-    const appliedJobIds = new Set(
-      appliedJobs.map((item) => item.job.toString())
-    );
+    const appliedJobIds = await this.jobCandidateService.getJobsAppliedByUser(userId);
+    const appliedJobIdsSet = new Set(appliedJobIds);
     
     return jobs.map((job) =>
-      this.toDto(job, appliedJobIds.has(job._id.toString())),  
+      this.toDto(job, appliedJobIdsSet.has(job._id.toString())),
     );
   }
 
@@ -78,12 +73,8 @@ export class JobsService {
     let isApplied = false;
 
     if (userId) {
-      const applied = await this.JobCandidateModel.findOne({
-        userId,
-        job: id,
-      });
-
-      isApplied = !!applied;
+      const appliedJobIds = await this.jobCandidateService.getJobsAppliedByUser(userId);
+      isApplied = appliedJobIds.includes(id);
     }
 
     return this.toDto(job, isApplied);
