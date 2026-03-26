@@ -5,6 +5,8 @@ import { JobCandidate } from './schemas/job-candidate.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CandidateStatusEnum, JobCandidateStatusEnum } from '../../common/enums';
+import { JobsDto } from '../jobs/dto/jobs.dto';
+import { Job } from '../jobs/schemas/job.schema';
 
 @Injectable()
 export class JobCandidateService {
@@ -102,12 +104,22 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
   }
 
 // CANDIDATE: xem job đã apply
-  async getJobsAppliedByUser(userId: string) {
+  async getJobIdsAppliedByUser(userId: string): Promise<string[]> {
     const jobs = await this.jobCandidateModel
       .find({ user: new Types.ObjectId(userId) })
-      .select('job')
+      .sort({ createdAt: -1 })
       .lean();
     return jobs.filter((job) => job.job).map((job) => job.job.toString());
+  }
+
+  async getJobsAppliedByUser(userId: string): Promise<JobsDto[]> {
+    const jobs = await this.jobCandidateModel
+      .find({ user: new Types.ObjectId(userId) })
+      .populate('job', 'title company location salaryMin salaryMax')
+      .select('job status createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    return jobs.filter((job) => job.job).map((job) => job.job as unknown as JobsDto);
   }
 
   async getAllActiveCandidates (jobId: string) {

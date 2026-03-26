@@ -33,6 +33,9 @@ export class UsersService {
 
 
    async updateProfile(userId: string, dto: UpdateUserDto) {
+    const updateData: any = {};
+    if (dto.fullName !== undefined) updateData.fullName = dto.fullName;
+    if (dto.phone !== undefined) updateData.phone = dto.phone;
     // check email trùng
     if (dto.email) {
       const exist = await this.userModel.findOne({ email: dto.email });
@@ -41,11 +44,7 @@ export class UsersService {
       }
     }
 
-    const updated = await this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: dto },
-      { new: true },
-    ).select('-password');
+    const updated = await this.userModel.findByIdAndUpdate( userId, updateData, { new: true }).select('-password');
 
     if (!updated) throw new NotFoundException('User not found');
 

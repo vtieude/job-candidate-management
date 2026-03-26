@@ -25,7 +25,7 @@ export class JobCandidateController {
     if (!userId) {
       throw new BadRequestException("UserId is missing");
     }
-    return await this.jobCandidateService.getJobsAppliedByUser(userId);
+    return await this.jobCandidateService.getJobIdsAppliedByUser(userId);
   }
 
   @Get()

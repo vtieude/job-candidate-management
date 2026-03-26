@@ -59,7 +59,7 @@ export class JobsService {
 
     // lấy danh sách job đã apply
     const appliedJobs = await this.JobCandidateModel.find({
-      userId: userId,
+      user: userId,
     });
 
     const appliedJobIds = new Set(
@@ -79,7 +79,7 @@ export class JobsService {
 
     if (userId) {
       const applied = await this.JobCandidateModel.findOne({
-        userId,
+        user: userId,
         job: id,
       });
 

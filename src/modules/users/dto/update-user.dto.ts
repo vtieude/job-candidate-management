@@ -1,13 +1,27 @@
-import { PartialType } from '@nestjs/swagger';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { CreateUserDto } from '../../auth/dto/create-user.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { UserLevel } from '../schemas/user.schema';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @IsString()
+  @MinLength(2)
+  @MaxLength(50)
   fullName?: string;
 
   @IsOptional()
   @IsString()
+  @MinLength(9)
+  @MaxLength(15)
   phone?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional({ enum: UserLevel, example: UserLevel.Junior, })
+  @IsOptional()
+  @IsEnum(UserLevel)
+  level?: UserLevel;
 }
