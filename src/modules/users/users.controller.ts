@@ -47,7 +47,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
@@ -71,4 +71,13 @@ export class UsersController {
   public async getProfile(@CurrentUser() user: UserPayloadRequest) {
     return await this.usersService.findOneByEmail(user.email);
   }
+
+  // API cho nút "Cập nhật"
+  @Patch('/me')
+  public async updateProfile(
+    @CurrentUser() user: UserPayloadRequest,
+    @Body() dto: UpdateUserDto,
+  ) {
+    return await this.usersService.updateProfile(user.userId, dto);
+}
 }

@@ -20,5 +20,6 @@ import { Job, JobSchema } from '../jobs/schemas/job.schema';
   ],
   controllers: [JobCandidateController],
   providers: [JobCandidateService],
+  exports: [MongooseModule],
 })
 export class JobCandidateModule {}

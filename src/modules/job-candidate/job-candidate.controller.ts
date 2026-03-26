@@ -21,11 +21,11 @@ export class JobCandidateController {
   // candidate xem job đã apply
   @Get('me')
   @Roles(UserRole.Candidate)
-  getMyApplications(@CurrentUser('userId') userId: string) {
+  async getMyApplications(@CurrentUser('userId') userId: string): Promise<string[]> {
     if (!userId) {
       throw new BadRequestException("UserId is missing");
     }
-    return this.jobCandidateService.getByUser(userId);
+    return await this.jobCandidateService.getJobsAppliedByUser(userId);
   }
 
   @Get()

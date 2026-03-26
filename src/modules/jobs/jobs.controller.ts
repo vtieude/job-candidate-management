@@ -22,8 +22,8 @@ export class JobsController {
   @Get()
   @Public() //Authen
   findAll(
-    @Query() query: SearchJobDto) {
-    return this.jobsService.findAll(query.q, query.location, query.minSalary, query.maxSalary);
+    @Query() query: SearchJobDto, @CurrentUser('userId') userId?: string,): Promise<JobsDto[]> {
+    return this.jobsService.findAll(query.q, query.location, query.minSalary, query.maxSalary, userId);
   }
 
   @Get(':id')

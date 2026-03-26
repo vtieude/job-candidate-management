@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { UserPayloadRequest } from '../../common/dto';
 import { appConfig } from '../../config/app.config';
+import { UserRole } from '../../common/enums';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       userId: payload.userId,
       email: payload.email,
-      role: payload.role,
+      role: payload.role as UserRole,
     };
   }
 }
