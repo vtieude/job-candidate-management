@@ -49,12 +49,9 @@ export class NotificationsService {
     
     const dto = this.toDto(notification);
     
-    // Emit real-time notification if gateway is available
+    // Notify user via socket (only sends unread count, not notification data)
     if (this.notificationsGateway) {
-      this.notificationsGateway.sendNotificationToUser(
-        createNotificationDto.recipient,
-        dto,
-      );
+      this.notificationsGateway.notifyUser(createNotificationDto.recipient);
     }
     
     return dto;
@@ -107,6 +104,10 @@ export class NotificationsService {
     if (!notification) {
       throw new NotFoundException('Notification not found');
     }
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
+    }
     return this.toDto(notification);
   }
 
@@ -119,6 +120,10 @@ export class NotificationsService {
       },
       { status: NotificationStatusEnum.Read },
     );
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
+    }
     return { modifiedCount: result.modifiedCount };
   }
 
@@ -146,6 +151,11 @@ export class NotificationsService {
 
     if (result.deletedCount === 0) {
       throw new NotFoundException('Notification not found');
+    }
+    
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
     }
   }
 

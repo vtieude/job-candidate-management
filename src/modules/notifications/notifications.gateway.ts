@@ -64,39 +64,14 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     }
   }
 
-  @SubscribeMessage('get_notifications')
-  async handleGetNotifications(@ConnectedSocket() client: Socket) {
-    const userId = client.data.userId;
-    if (!userId) return;
-
-    const notifications = await this.notificationsService.findAllByUser(userId);
-    client.emit('notifications_list', notifications);
-  }
-
-  @SubscribeMessage('get_unread_count')
-  async handleGetUnreadCount(@ConnectedSocket() client: Socket) {
-    const userId = client.data.userId;
-    if (!userId) return;
-
-    const count = await this.notificationsService.getUnreadCount(userId);
-    client.emit('unread_count', { count });
-  }
-
-  // Method to send notification to specific user
-  sendNotificationToUser(userId: string, notification: any) {
+  // Method to notify user that they have a new notification (without sending data)
+  notifyUser(userId: string) {
     const socketId = this.userSockets.get(userId);
     if (socketId) {
-      this.server.to(socketId).emit('new_notification', notification);
-      
-      // Also update unread count
+      // Only send unread count - client will call API to get notifications
       this.notificationsService.getUnreadCount(userId).then(count => {
         this.server.to(socketId).emit('unread_count', { count });
       });
     }
-  }
-
-  // Method to broadcast notification to all connected users
-  broadcastNotification(notification: any) {
-    this.server.emit('new_notification', notification);
   }
 }
