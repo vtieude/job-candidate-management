@@ -49,12 +49,9 @@ export class NotificationsService {
     
     const dto = this.toDto(notification);
     
-    // Emit real-time notification if gateway is available
+    // Notify user via socket (only sends unread count, not notification data)
     if (this.notificationsGateway) {
-      this.notificationsGateway.sendNotificationToUser(
-        createNotificationDto.recipient,
-        dto,
-      );
+      this.notificationsGateway.notifyUser(createNotificationDto.recipient);
     }
     
     return dto;
