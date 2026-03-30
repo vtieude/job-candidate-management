@@ -144,6 +144,11 @@ export class NotificationsService {
     if (result.deletedCount === 0) {
       throw new NotFoundException('Notification not found');
     }
+    
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
+    }
   }
 
   // Helper method to create job application notification
