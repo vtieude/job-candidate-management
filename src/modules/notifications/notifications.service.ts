@@ -104,6 +104,10 @@ export class NotificationsService {
     if (!notification) {
       throw new NotFoundException('Notification not found');
     }
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
+    }
     return this.toDto(notification);
   }
 
@@ -116,6 +120,10 @@ export class NotificationsService {
       },
       { status: NotificationStatusEnum.Read },
     );
+    // Notify user via socket to update unread count
+    if (this.notificationsGateway) {
+      this.notificationsGateway.notifyUser(userId);
+    }
     return { modifiedCount: result.modifiedCount };
   }
 
