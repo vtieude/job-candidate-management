@@ -70,10 +70,10 @@ export class UsersController {
   // API cho nút "Cập nhật"
   @Patch('/me')
   public async updateProfile(
-    @CurrentUser() user: UserPayloadRequest,
+    @CurrentUser('userId') userId: string,
     @Body() dto: UpdateUserDto,
   ) {
-    return await this.usersService.updateProfile(user.userId, dto);
+    return await this.usersService.updateProfile(userId, dto);
   }
 
   @Get(':id')

@@ -36,12 +36,19 @@ export class UsersService {
     const updateData: any = {};
     if (dto.fullName !== undefined) updateData.fullName = dto.fullName;
     if (dto.phone !== undefined) updateData.phone = dto.phone;
+    if (dto.level !== undefined) updateData.level = dto.level;
+
     // check email trùng
-    if (dto.email) {
+    if (dto.email !== undefined) {
       const exist = await this.userModel.findOne({ email: dto.email });
       if (exist && exist._id.toString() !== userId) {
         throw new BadRequestException('Email already exists');
       }
+      updateData.email = dto.email;
+    }
+
+    if ((dto as any).skills !== undefined) {
+      updateData.skills = (dto as any).skills;
     }
 
     const updated = await this.userModel.findByIdAndUpdate( userId, updateData, { new: true }).select('-password');

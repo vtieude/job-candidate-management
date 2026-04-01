@@ -9,6 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/schemas/user.schema';
 import { Job } from '../jobs/schemas/job.schema';
 import { JobsDto } from '../jobs/dto/jobs.dto';
+import { AppliedJobResponseDto } from './dto/job-candidate.dto';
 
 @Injectable()
 export class JobCandidateService {
@@ -17,8 +18,36 @@ export class JobCandidateService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  private mapApplication(item: any) {
+    return {
+      id: item._id,
+      status: item.status,
+      appliedAt: item.createdAt,
+    };
+  }
+
+  private mapJob(job: any) {
+    return {
+      id: job._id,
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      salaryMin: job.salaryMin,
+      salaryMax: job.salaryMax,
+    };
+  }
+
+  private mapUser(user: any) {
+    return {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      skills: user.skills,
+    };
+  }
+
   //Apply job
-  async apllyJobs(createJobCandidateDto: CreateJobCandidateDto, userId: string) {
+  async applyJobs(createJobCandidateDto: CreateJobCandidateDto, userId: string) {
 
     const exist = await this.jobCandidateModel.findOne({
       job: createJobCandidateDto.job,
@@ -168,7 +197,10 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
     if (createJobs.createdBy.toString() !== userId) {
       throw new BadRequestException('You are not allowed to view this job');
     }
-    return jobCandidates;
+    return jobCandidates.map((item) => ({
+      application: this.mapApplication(item),
+      candidate: this.mapUser(item.user),
+    }));
   }
 
 // CANDIDATE: xem job đã apply
@@ -177,17 +209,17 @@ async assignCandidateAndJob(jobId: string, userId: string, status: JobCandidateS
       .find({ user: new Types.ObjectId(userId) })
       .sort({ createdAt: -1 })
       .lean();
-    return jobs.filter((job) => job.job).map((job) => job.job.toString());
+    return jobs.map((job) => job.job.toString());
   }
 
-  async getJobsAppliedByUser(userId: string): Promise<JobsDto[]> {
+  async getHistoryApplied (userId: string): Promise<AppliedJobResponseDto[]> {
     const jobs = await this.jobCandidateModel
       .find({ user: new Types.ObjectId(userId) })
       .populate('job', 'title company location salaryMin salaryMax')
       .select('job status createdAt')
       .sort({ createdAt: -1 })
       .lean();
-    return jobs.filter((job) => job.job).map((job) => job.job as unknown as JobsDto);
+    return jobs.filter((job) => job.job !== null && job.job !== undefined).map((job) => ({application: this.mapApplication(job), job: this.mapJob(job.job),}));
   }
 
   async getAllActiveCandidates (jobId: string) {

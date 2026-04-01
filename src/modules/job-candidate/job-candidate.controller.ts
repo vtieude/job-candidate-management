@@ -15,10 +15,11 @@ export class JobCandidateController {
   @Post()
   @Roles(UserRole.Candidate ) // apply job
   async applyJobs(@Body() createJobCandidateDto: CreateJobCandidateDto, @CurrentUser('userId') userId: string,) {
-    return this.jobCandidateService.apllyJobs(createJobCandidateDto, userId );
+    return this.jobCandidateService.applyJobs(createJobCandidateDto, userId );
   }
 
   // candidate xem job đã apply
+  // không được sửa API, phải tạo mới
   @Get('me')
   @Roles(UserRole.Candidate)
   async getMyApplications(@CurrentUser('userId') userId: string): Promise<string[]> {
@@ -26,6 +27,12 @@ export class JobCandidateController {
       throw new BadRequestException("UserId is missing");
     }
     return await this.jobCandidateService.getJobIdsAppliedByUser(userId);
+  }
+
+  @Get('my-applications')
+  @Roles(UserRole.Candidate)
+  async getHistoryApplied(@CurrentUser('userId') userId: string) {
+    return await this.jobCandidateService.getHistoryApplied(userId);
   }
 
   @Get()

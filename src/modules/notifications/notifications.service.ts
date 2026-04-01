@@ -67,7 +67,7 @@ export class NotificationsService {
       .sort({ createdAt: -1 })
       .lean();
     
-    return notifications.map(n => this.toDto(n));
+    return notifications.map(n => this.toDto(n)); //change job.service
   }
 
   // Get unread notifications for a user
