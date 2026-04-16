@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { AdminCreateUserDto } from './dto/admin-create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiCreatedResponse } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
-import { Public, Roles } from '../../common/decorators';
+import { Roles } from '../../common/decorators';
 import { ApiPaginatedResponse } from '../../common/swaggers/paginated.decorators';
 import { UserRole } from '../../common/enums';
 import { UserPayloadRequest } from '../../common/dto';
@@ -34,6 +35,12 @@ export class UsersController {
     return createUsersDto;
   }
 
+  @Post()
+  @Roles(UserRole.Admin)
+  createByAdmin(@Body() createUserDto: AdminCreateUserDto) {
+    return this.usersService.createByAdmin(createUserDto);
+  }
+
   @Get('search')
   @ApiPaginatedResponse(UserDto)
   async searchAll(): Promise<PaginatedDto<UserDto>> {
@@ -45,19 +52,26 @@ export class UsersController {
     };
   }
 
+  @Get('admin/stats')
+  @Roles(UserRole.Admin)
+  async getAdminStats() {
+    return await this.usersService.getAdminStats();
+  }
+
   @Patch(':id')
+  @Roles(UserRole.Admin)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @Roles(UserRole.Admin)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 
-
   @Get()
-  @Roles(UserRole.Admin) //Authen
+  @Roles(UserRole.Admin)
   async getAllUsers() {
     return await this.usersService.findAll();
   }
@@ -67,13 +81,12 @@ export class UsersController {
     return await this.usersService.findOneByEmail(user.email);
   }
 
-  // API cho nút "Cập nhật"
   @Patch('/me')
   public async updateProfile(
-    @CurrentUser() user: UserPayloadRequest,
+    @CurrentUser('userId') userId: string,
     @Body() dto: UpdateUserDto,
   ) {
-    return await this.usersService.updateProfile(user.userId, dto);
+    return await this.usersService.updateProfile(userId, dto);
   }
 
   @Get(':id')

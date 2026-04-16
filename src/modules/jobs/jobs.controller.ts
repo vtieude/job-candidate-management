@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -14,35 +14,42 @@ export class JobsController {
 
   @Post()
   @Roles(UserRole.Recruiter)
-  async create(@Body() createJobDto: CreateJobDto, @CurrentUser('userId') userId: string,): Promise<string> {
+  async create(@Body() createJobDto: CreateJobDto, @CurrentUser('userId') userId: string): Promise<string> {
     await this.jobsService.create(createJobDto, userId);
     return 'ok';
   }
 
   @Get()
-  @Public() //Authen
-  findAll(
-    @Query() query: SearchJobDto, @CurrentUser('userId') userId?: string,): Promise<JobsDto[]> {
+  @Public()
+  findAll(@Query() query: SearchJobDto, @CurrentUser('userId') userId?: string): Promise<JobsDto[]> {
     return this.jobsService.findAll(query.q, query.location, query.minSalary, query.maxSalary, userId);
   }
 
   @Get(':id')
   @Public()
   async findOne(@Param('id') id: string): Promise<JobsDto> {
-    
     const job = await this.jobsService.findOne(id);
     return job;
   }
 
   @Patch(':id')
-  @Roles(UserRole.Recruiter)
-  update(@Param('id') id: string, @Body() updateJobDto: UpdateJobDto, @CurrentUser('userId') userId: string) {
-    return this.jobsService.update(id, updateJobDto, userId);
+  @Roles(UserRole.Recruiter, UserRole.Admin)
+  update(
+    @Param('id') id: string,
+    @Body() updateJobDto: UpdateJobDto,
+    @CurrentUser('userId') userId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.jobsService.update(id, updateJobDto, userId, role);
   }
 
   @Delete(':id')
-  @Roles(UserRole.Recruiter)
-  remove(@Param('id') id: string, @CurrentUser('userId') userId: string) { // CurrentUser: kiểm tra quyền sở hữu
-    return this.jobsService.remove(id, userId);
+  @Roles(UserRole.Recruiter, UserRole.Admin)
+  remove(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.jobsService.remove(id, userId, role);
   }
 }
