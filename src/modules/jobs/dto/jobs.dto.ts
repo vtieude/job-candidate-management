@@ -1,40 +1,28 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { JobStatusEnum } from "../../../common/enums";
+import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { JobStatusEnum, JobWorkingType } from "../../../common/enums";
+import { Job } from "../schemas/job.schema";
+import { Types } from "mongoose";
 
-export class JobsDto {
-  @ApiProperty()
-  _id: string; 
+export class JobsDto  extends PartialType(Job){
+  _id!: Types.ObjectId;
+  title!: string;
 
-  @ApiProperty()
-  title: string;
+  company!: string;
 
-  @ApiProperty()
-  company: string;
+  location!: string;
 
-  @ApiProperty()
-  location: string;
-
-  @ApiProperty({ enum: JobStatusEnum })
-  status: JobStatusEnum; // 
-
-  @ApiProperty({ required: false })
   salaryMin?: number;
 
-  @ApiProperty({ required: false })
   salaryMax?: number;
 
-  @ApiProperty({ required: false })
+  skills?: string[];
+
+  jobType?: JobWorkingType;
+
   description?: string;
 
-  @ApiProperty()
-  createdAt: string; 
-
-  @ApiProperty()
-  updatedAt: string; 
-
+  status!: JobStatusEnum;
+  
   @ApiProperty({ required: false })
   isApplied?: boolean; 
-
-  @ApiProperty({ required: false })
-  createdBy?: string; 
 }

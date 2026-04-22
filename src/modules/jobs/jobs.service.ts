@@ -6,7 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JobsDto } from './dto/jobs.dto';
 import { JobCandidateService } from '../job-candidate/job-candidate.service';
-import { UserRole } from '../../common/enums';
+import { JobWorkingType, UserRole } from '../../common/enums';
 
 @Injectable()
 export class JobsService {
@@ -23,9 +23,9 @@ export class JobsService {
     });
   }
 
-  private toDto(job: any, isApplied = false): JobsDto {
+  private toDto(job: Job, isApplied = false): JobsDto {
     return {
-      _id: job._id.toString(),
+      _id: job._id,
       title: job.title,
       company: job.company,
       location: job.location,
@@ -33,10 +33,12 @@ export class JobsService {
       salaryMin: job.salaryMin,
       salaryMax: job.salaryMax,
       description: job.description,
-      createdAt: job.createdAt?.toISOString?.() ?? job.createdAt,
-      updatedAt: job.updatedAt?.toISOString?.() ?? job.updatedAt,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
       isApplied,
-      createdBy: job.createdBy?._id?.toString?.() ?? job.createdBy?.toString?.() ?? job.createdBy,
+      skills: job.skills,
+      jobType: job.jobType ?? JobWorkingType.FullTime,
+      createdBy: job.createdBy,
     };
   }
 

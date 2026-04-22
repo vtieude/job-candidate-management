@@ -28,6 +28,9 @@ export class User extends BaseDoc {
   @Prop({ trim: true })
   fullName?: string;
 
+  @Prop({ type: [{ type: String, trim: true }], default: [] })
+  skills?: string[];
+
   @Prop()
   phone?: string;
 
