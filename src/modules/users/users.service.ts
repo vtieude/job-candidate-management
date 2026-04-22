@@ -16,7 +16,23 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly jobsService: JobsService,
     private readonly jobCandidateService: JobCandidateService,
-  ) {}
+  ) { }
+
+  private toDto(user: User): UserDto {
+    return {
+      _id: user._id,
+      password: user.password,
+      email: user.email,
+      role: user.role,
+      active: user.active,
+      skills: user.skills,
+      phone: user.phone,
+      level: user.level,
+      fullName: user.fullName,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+  }
 
   async create(user: CreateUserDto) {
     await this.userModel.create({
@@ -81,7 +97,10 @@ export class UsersService {
 
   async findOneByEmail(email: string) {
     const userEntity = await this.userModel.findOne({ email });
-    return userEntity;
+    if (!userEntity) {
+       throw new NotFoundException('User not founds');
+    }
+    return this.toDto(userEntity);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

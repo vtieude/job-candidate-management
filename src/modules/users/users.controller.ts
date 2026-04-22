@@ -10,22 +10,21 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { AdminCreateUserDto } from './dto/admin-create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileUserDto, UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiCreatedResponse } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 import { Roles } from '../../common/decorators';
 import { ApiPaginatedResponse } from '../../common/swaggers/paginated.decorators';
 import { UserRole } from '../../common/enums';
-import { UserPayloadRequest } from '../../common/dto';
 import { CurrentUser } from '../../common/decorators/user.decorator';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
-  @Roles(UserRole.Admin)
   @Post('bulk')
+  @Roles(UserRole.Admin)
   @ApiCreatedResponse({
     description: 'All records has been successfully created.',
     type: [CreateUserDto],
@@ -39,6 +38,15 @@ export class UsersController {
   @Roles(UserRole.Admin)
   createByAdmin(@Body() createUserDto: AdminCreateUserDto) {
     return this.usersService.createByAdmin(createUserDto);
+  }
+
+  @Patch('/updateProfile')
+  @Roles(UserRole.Candidate)
+  public async updateProfile(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: UpdateProfileUserDto,
+  ) {
+    return await this.usersService.updateProfile(userId, dto);
   }
 
   @Get('search')
@@ -77,17 +85,11 @@ export class UsersController {
   }
 
   @Get('/me')
-  public async getProfile(@CurrentUser() user: UserPayloadRequest) {
-    return await this.usersService.findOneByEmail(user.email);
+  public async getProfile(@CurrentUser('email') email: string): Promise<UserDto> {
+    return await this.usersService.findOneByEmail(email);
   }
 
-  @Patch('/me')
-  public async updateProfile(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: UpdateUserDto,
-  ) {
-    return await this.usersService.updateProfile(userId, dto);
-  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

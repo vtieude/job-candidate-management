@@ -1,15 +1,19 @@
-import { IsEmail, IsIn, IsString } from "class-validator";
+import { IsArray, IsEmail, IsIn, IsString } from "class-validator";
 import { UserRole } from "../../../common/enums";
 
 export class CreateUserDto {
-  password: string;
+  password!: string;
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsIn([UserRole.Candidate, UserRole.Recruiter], {
     message: 'Role must be candidate or hr',
   })
-  role: UserRole;
+  role!: UserRole;
+
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[]; 
 }
 
 // crud

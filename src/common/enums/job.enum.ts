@@ -10,3 +10,9 @@ export enum JobCandidateStatusEnum {
   Rejected = 'rejected',
   Hired = 'hired'
 }
+
+export enum JobWorkingType {
+  FullTime = 'fulltime',
+  PartTime = 'parttime',
+  Contract = 'contract',
+}

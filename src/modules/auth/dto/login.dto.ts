@@ -8,5 +8,5 @@ export class LoginDto extends OmitType(BaseUserDto, ['role'] as const) {
 }
 
 export class LoginReponseDto {
-  access_token: string
+  access_token!: string
 }
