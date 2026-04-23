@@ -14,4 +14,8 @@ export const appConfig: AppConfig = {
     expiresIn: parseInt(process.env.JWT_EXPIRES_IN ?? '600', 10),
   },
   redis: process.env.REDIS_URL ? { url: process.env.REDIS_URL } : undefined,
+  aiSetup: {
+    provider: process.env.PROVIDER || 'openai',
+    openApiKey: process.env.OPENAI_API_KEY || ''
+  }
 };
