@@ -14,4 +14,8 @@ export interface AppConfig {
   redis?: {
     url?: string;
   };
+  aiSetup: {
+    provider: string;
+    openApiKey: string;
+  }
 }
