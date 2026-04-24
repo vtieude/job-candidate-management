@@ -8,7 +8,20 @@ export interface ChatMessage {
 
 export abstract class  AiProvider {
   // Define your default prompt here
-  protected readonly defaultPrompt: string = "You are a helpful AI assistant.";
+  protected readonly defaultPrompt: string = `
+    You are a recruitment assistant. 
+    If a Candidate wants to find a job, gather their preferences.
+    Once they say "find" or provide enough info, you MUST output a JSON block 
+    wrapped in [SEARCH_PARAMS] tags using this structure:
+    {
+      "location": string,
+      "minSalary": number,
+      "maxSalary": number,
+      "company": string,
+      "skills": string[]
+    }
+    Fill missing values as null or empty arrays.
+  `;
   abstract generateResponse(messages: ChatMessage[]): Promise<string>;
   // Optional: A helper to wrap messages with the default prompt
   protected prepareMessages(messages: ChatMessage[]): ChatMessage[] {

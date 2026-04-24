@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { JobsDto } from './dto/jobs.dto';
 import { JobCandidateService } from '../job-candidate/job-candidate.service';
 import { JobWorkingType, UserRole } from '../../common/enums';
+import { IFindAIJob } from '../../interfaces/job.interface';
 
 @Injectable()
 export class JobsService {
@@ -40,6 +41,27 @@ export class JobsService {
       jobType: job.jobType ?? JobWorkingType.FullTime,
       createdBy: job.createdBy,
     };
+  }
+
+  async findAllWithAI(aiFilter: IFindAIJob): Promise<JobsDto[]> {
+    const filter: any = {};
+    if (aiFilter.title) {
+      filter.$or = [
+        { title: { $regex: aiFilter.title, $options: 'i' } },
+        { company: { $regex: aiFilter.company, $options: 'i' } },
+      ];
+    }
+    if (!!location) {
+      filter.$and = [{ location: { $regex: location, $options: 'i' } }];
+    }
+    if (!!aiFilter.minSalary || !!aiFilter.maxSalary) {
+      filter.$and = filter.$and || [];
+      if (aiFilter.minSalary !== undefined) filter.$and.push({ salaryMin: { $gte: aiFilter.minSalary } });
+      if (aiFilter.maxSalary !== undefined) filter.$and.push({ salaryMax: { $lte: aiFilter.maxSalary } });
+    }
+
+    const jobs = await this.jobModel.find(filter).sort({ createdAt: -1 }).exec();
+    return jobs.map((job) => this.toDto(job));
   }
 
   async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number, userId?: string): Promise<JobsDto[]> {

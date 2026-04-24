@@ -7,6 +7,7 @@ import { Message, MessageSchema } from './schemas/message.schema';
 import { appConfig } from '../../config/app.config';
 import { ClaudeProvider } from './providers/claude.provider';
 import { OpenAiProvider } from './providers/openai.provider';
+import { JobsModule } from '../jobs/jobs.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -19,6 +20,7 @@ import { OpenAiProvider } from './providers/openai.provider';
         schema: MessageSchema
       }
     ]),
+    JobsModule
   ],
   controllers: [ChatbotController],
   providers: [ChatbotService,
