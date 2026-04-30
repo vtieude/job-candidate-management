@@ -9,6 +9,7 @@ import { hash } from 'bcrypt';
 import { JobsService } from '../jobs/jobs.service';
 import { JobCandidateService } from '../job-candidate/job-candidate.service';
 import { UserRole } from '../../common/enums';
+import { IFindAICandidate } from '../../interfaces/job.interface';
 
 @Injectable()
 export class UsersService {
@@ -32,6 +33,27 @@ export class UsersService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     };
+  }
+
+  async findAllWithAI(aiFilter: IFindAICandidate) {
+    const filter: any = {};
+    if (aiFilter.level) {
+      filter.level = { $regex: aiFilter.level, $options: 'i' };
+    }
+    if (aiFilter.skills && aiFilter.skills.length > 0) {
+      // Use $and to ensure the document contains EVERY skill in the list
+      filter.$and = aiFilter.skills.map(skill => ({
+        skills: { 
+          $regex: skill, 
+          $options: 'i' 
+        }
+      }));
+    }
+    
+    const skip = (Math.min(aiFilter.page, 1) - 1) * aiFilter.limit;
+        
+    const users = await this.userModel.find(filter).limit(aiFilter.limit ?? 10).skip(skip).sort({ createdAt: -1 }).exec();
+    return users.map((user) => this.toDto(user));
   }
 
   async create(user: CreateUserDto) {
@@ -68,6 +90,12 @@ export class UsersService {
     const userEntity = await this.userModel.findById(id).select('-password');
     if (!userEntity) throw new NotFoundException('User not found');
     return userEntity;
+  }
+
+  async findPublicOne(id: string) {
+    const userEntity = await this.userModel.findById(id).select('-password');
+    if (!userEntity) throw new NotFoundException('User not found');
+    return this.toDto(userEntity);
   }
 
   async updateProfile(userId: string, dto: UpdateUserDto) {

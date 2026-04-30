@@ -14,6 +14,7 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { JobCandidateModule } from './modules/job-candidate/job-candidate.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AppController } from './app.controller';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AppController } from './app.controller';
     }),
     UsersModule,
     AuthModule,
+    ChatbotModule,
     CandidatesModule,
     JobsModule,
     JobCandidateModule,

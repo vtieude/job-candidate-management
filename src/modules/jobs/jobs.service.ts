@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { JobsDto } from './dto/jobs.dto';
 import { JobCandidateService } from '../job-candidate/job-candidate.service';
 import { JobWorkingType, UserRole } from '../../common/enums';
+import { IFindAIJob } from '../../interfaces/job.interface';
 
 @Injectable()
 export class JobsService {
@@ -40,6 +41,37 @@ export class JobsService {
       jobType: job.jobType ?? JobWorkingType.FullTime,
       createdBy: job.createdBy,
     };
+  }
+
+  async findAllWithAI(aiFilter: IFindAIJob): Promise<JobsDto[]> {
+    const filter: any = {};
+    if (aiFilter.title) {
+      filter.$or = [
+        { title: { $regex: aiFilter.title, $options: 'i' } },
+        { company: { $regex: aiFilter.company, $options: 'i' } },
+      ];
+    }
+    if (aiFilter.location) {
+      filter.$and = [{ location: { $regex: aiFilter.location, $options: 'i' } }];
+    }
+    if (!!aiFilter.minSalary || !!aiFilter.maxSalary) {
+      filter.$and = filter.$and || [];
+      if (aiFilter.minSalary > 0) filter.$and.push({ salaryMin: { $gte: aiFilter.minSalary } });
+      if (aiFilter.maxSalary > 0) filter.$and.push({ salaryMax: { $lte: aiFilter.maxSalary } });
+    }
+    if (aiFilter.skills && aiFilter.skills.length > 0) {
+      // Use $and to ensure the document contains EVERY skill in the list
+      filter.$and = aiFilter.skills.map(skill => ({
+        skills: { 
+          $regex: skill, 
+          $options: 'i' 
+        }
+      }));
+    }
+    
+    const skip = (Math.min(aiFilter.page, 1) - 1) * aiFilter.limit;
+    const jobs = await this.jobModel.find(filter).limit(aiFilter.limit).skip(skip).sort({ createdAt: -1 }).exec();
+    return jobs.map((job) => this.toDto(job));
   }
 
   async findAll(q?: string, location?: string, minSalary?: number, maxSalary?: number, userId?: string): Promise<JobsDto[]> {
