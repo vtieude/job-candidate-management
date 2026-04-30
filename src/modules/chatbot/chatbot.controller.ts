@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Req } from '@nestjs/common';
 import { ChatbotService } from './chatbot.service';
-import { CurrentUser } from '../../common/decorators';
+import { CurrentUser, Public } from '../../common/decorators';
 import { UserRole } from '../../common/enums';
 import { UserChatDto, UserChatResponseDto } from './dto/aiChatResponse.dto';
 
@@ -20,6 +20,17 @@ export class ChatbotController {
       userChatDto.content,
       role,
       userChatDto.conversationId,
+    );
+  }
+  @Public()
+  @Post('conversations')
+  async getAllUserConvers(
+    @Body() userChatDto: UserChatDto,
+    @CurrentUser('role') role: UserRole,
+    @CurrentUser('userId') userId: string
+  ) : Promise<any> {
+    // Replace 'static-user-id' with req.user.id if using AuthGuards
+    return await this.chatbotService.getChatUsers(
     );
   }
 }

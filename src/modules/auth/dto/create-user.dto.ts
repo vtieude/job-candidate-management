@@ -1,5 +1,6 @@
-import { IsArray, IsEmail, IsIn, IsString } from "class-validator";
+import { IsArray, IsEmail, IsIn, IsOptional, IsString } from "class-validator";
 import { UserRole } from "../../../common/enums";
+import { Transform } from "class-transformer";
 
 export class CreateUserDto {
   password!: string;
@@ -10,16 +11,10 @@ export class CreateUserDto {
     message: 'Role must be candidate or hr',
   })
   role!: UserRole;
-
+  
+  @IsOptional()
   @IsArray()
+  @Transform(({ value }) => value ?? []) 
   @IsString({ each: true })
   skills?: string[]; 
 }
-
-// crud
-// create  => http method post
-// read => http method get
-// update => http method patch/put
-// delete (soft , hard delete) => method delete
-
-// fe => api BE  , debug
