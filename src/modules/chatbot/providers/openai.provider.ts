@@ -33,7 +33,7 @@ export class OpenAiProvider extends  AiProvider {
 
     return {
       aiResponse: content,
-      rawText: !!rawText ? rawText : "Data: ",
+      rawText: rawText,
       searchParams,
       detectedIntent: searchParams ? 'SEARCH' : 'CONVERSATION'
     };

@@ -33,6 +33,40 @@ export class ChatbotService {
     };
   }
 
+
+  async getChatUsers() {
+    const userConvers = await this.convoModel.aggregate([
+      // Flatten participants and remove 'AI'
+      { $unwind: "$participants" },
+      { $match: { participants: { $ne: MessageSender.AI_ASSISTANT } } },
+      // Group by User ID to get unique users
+      { $group: { _id: "$participants", lastActivity: { $max: "$updatedAt" } } },
+      // Join User details
+      {
+        $lookup: {
+          from: "users",
+          let: { userId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] } } }
+          ],
+          as: "details"
+        }
+      },
+      { $unwind: "$details" },
+      { $sort: { lastActivity: -1 } }
+    ]);
+    return userConvers.map((userConver) => {
+      return {
+        _id: userConver._id,
+        lastActivity: userConver.lastActivity,
+        role: userConver.details.role,
+        fullName: userConver.details?.fullName
+      }
+    })
+  }
+  
+
+
   async getAIConversaction(userId: string, conversationId?: string) {
      if (conversationId) {
       return await this.convoModel.findById(conversationId);
@@ -120,13 +154,19 @@ export class ChatbotService {
     
     let userDtos: UserDto[] = [];
     let jobDtos: JobsDto[] = [];
-  
+    let rawTextResponse = aiContent.rawText;
     // Execute Database Search if AI provided params
     if (aiContent.searchParams) {
       if (userRole === UserRole.Candidate) {
         jobDtos = await this.jobService.findAllWithAI(aiContent.searchParams);
+        if (jobDtos.length == 0) {
+          rawTextResponse = 'No jobs currently match all those filters. Please try with different filter';
+        }
       } else {
         userDtos = await this.userService.findAllWithAI(aiContent.searchParams);
+        if (userDtos.length == 0) {
+          rawTextResponse = 'No candidates currently match all those filters. Please try with different filter';
+        }
       }
     }
   
@@ -138,7 +178,7 @@ export class ChatbotService {
     });
   
     return {
-      content: aiContent.rawText,
+      content: rawTextResponse,
       conversationId: conversationId.toString(),
       messageDto: this.toDto(aiMessage),
       jobDtos,

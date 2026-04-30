@@ -11,7 +11,6 @@ export class Conversation extends BaseDoc {
   @Prop({ default: 'AI Support Chat' })
   title!: string;
 
-  // recruiter tạo job
   @Prop({ type: [{ type: String }], required: true })
   participants!: string[]
 
