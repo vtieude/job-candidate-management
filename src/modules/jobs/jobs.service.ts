@@ -51,16 +51,26 @@ export class JobsService {
         { company: { $regex: aiFilter.company, $options: 'i' } },
       ];
     }
-    if (!!location) {
-      filter.$and = [{ location: { $regex: location, $options: 'i' } }];
+    if (aiFilter.location) {
+      filter.$and = [{ location: { $regex: aiFilter.location, $options: 'i' } }];
     }
     if (!!aiFilter.minSalary || !!aiFilter.maxSalary) {
       filter.$and = filter.$and || [];
-      if (aiFilter.minSalary !== undefined) filter.$and.push({ salaryMin: { $gte: aiFilter.minSalary } });
-      if (aiFilter.maxSalary !== undefined) filter.$and.push({ salaryMax: { $lte: aiFilter.maxSalary } });
+      if (aiFilter.minSalary > 0) filter.$and.push({ salaryMin: { $gte: aiFilter.minSalary } });
+      if (aiFilter.maxSalary > 0) filter.$and.push({ salaryMax: { $lte: aiFilter.maxSalary } });
     }
-
-    const jobs = await this.jobModel.find(filter).sort({ createdAt: -1 }).exec();
+    if (aiFilter.skills && aiFilter.skills.length > 0) {
+      // Use $and to ensure the document contains EVERY skill in the list
+      filter.$and = aiFilter.skills.map(skill => ({
+        skills: { 
+          $regex: skill, 
+          $options: 'i' 
+        }
+      }));
+    }
+    
+    const skip = (Math.min(aiFilter.page, 1) - 1) * aiFilter.limit;
+    const jobs = await this.jobModel.find(filter).limit(aiFilter.limit).skip(skip).sort({ createdAt: -1 }).exec();
     return jobs.map((job) => this.toDto(job));
   }
 

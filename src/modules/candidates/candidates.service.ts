@@ -4,6 +4,7 @@ import { UpdateCandidateDto } from './dto/update-candidate.dto';
 import { Candidate, CandidateDocument } from './schemas/candidate.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { IFindAICandidate } from '../../interfaces/job.interface';
 
 @Injectable()
 export class CandidatesService {

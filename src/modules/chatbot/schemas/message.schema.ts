@@ -3,11 +3,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Conversation } from './conversation.schema';
 import { MessageRole } from '../../../common/enums';
+import { BaseDoc } from '../../schemas/base.schema';
 
 export type MessageDocument = Message & Document;
 
 @Schema({ timestamps: true })
-export class Message {
+export class Message extends BaseDoc{
   @Prop({ type: Types.ObjectId, ref: 'Conversation', required: true })
   conversationId!: Types.ObjectId | Conversation;
 
@@ -17,7 +18,7 @@ export class Message {
   @Prop({ required: true })
   senderId!: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: '' })
   content!: string;
 }
 

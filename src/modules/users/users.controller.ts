@@ -14,7 +14,7 @@ import { UpdateProfileUserDto, UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiCreatedResponse } from '@nestjs/swagger';
 import { UserDto } from './dto/user.dto';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
-import { Roles } from '../../common/decorators';
+import { Public, Roles } from '../../common/decorators';
 import { ApiPaginatedResponse } from '../../common/swaggers/paginated.decorators';
 import { UserRole } from '../../common/enums';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -32,6 +32,14 @@ export class UsersController {
   @ApiBody({ type: [CreateUserDto] })
   createBulk(@Body() createUsersDto: CreateUserDto[]): CreateUserDto[] {
     return createUsersDto;
+  }
+
+  @Get('/profile/public/:candidateId')
+  @Public()
+  public async publicCandidateProfile(
+    @Param('candidateId') candidateId: string
+  ): Promise<UserDto> {
+    return await this.usersService.findPublicOne(candidateId);
   }
 
   @Post()

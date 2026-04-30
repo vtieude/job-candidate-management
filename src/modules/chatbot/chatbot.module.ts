@@ -4,10 +4,10 @@ import { ChatbotService } from './chatbot.service';
 import { ChatbotController } from './chatbot.controller';
 import { Conversation, ConversationSchema } from './schemas/conversation.schema';
 import { Message, MessageSchema } from './schemas/message.schema';
-import { appConfig } from '../../config/app.config';
-import { ClaudeProvider } from './providers/claude.provider';
 import { OpenAiProvider } from './providers/openai.provider';
 import { JobsModule } from '../jobs/jobs.module';
+import { AiProvider } from './interfaces/ai-provider.abstract';
+import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,21 +20,14 @@ import { JobsModule } from '../jobs/jobs.module';
         schema: MessageSchema
       }
     ]),
-    JobsModule
+    JobsModule,
+    UsersModule
   ],
   controllers: [ChatbotController],
   providers: [ChatbotService,
     {
-      provide: 'AI_PROVIDER',
-      useFactory: () => {
-        const type = appConfig.aiSetup.provider;
-        
-        if (type === 'claude') {
-          return new ClaudeProvider();
-        }
-        // Default to OpenAI
-        return new OpenAiProvider();
-      },
+      provide: AiProvider,
+      useClass: OpenAiProvider
     },
   ],
   exports: [ChatbotService],
