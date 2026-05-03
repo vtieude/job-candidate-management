@@ -9,5 +9,5 @@ export class MessageDto {
 
   content!: string;
 
-  createdAt: Date;
+  createdAt!: Date;
 }

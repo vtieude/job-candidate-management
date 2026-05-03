@@ -1,8 +1,13 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { UserRole } from "../../../common/enums";
 
-export interface AllUserChatDto {
-  _id: string,
-  lastActivity: Date,
-  role: UserRole,
-  fullName: string
+export class AllUserChatDto {
+  @ApiProperty()
+  conversationId!: string
+  @ApiProperty()
+  lastActivity!: Date
+  @ApiProperty()
+  fullName!: string
+  @ApiProperty()
+  lastMessage!:string
 }

@@ -1,9 +1,10 @@
 export class PaginatedDto<TData> {
-  total: number;
+  total!: number;
 
-  limit: number;
+  limit!: number;
 
-  offset: number;
+  offset!: number;
   
-  results: TData[];
+  results!: TData[];
 }
+
