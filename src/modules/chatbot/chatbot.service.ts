@@ -12,6 +12,9 @@ import { UserChatResponseDto } from './dto/aiChatResponse.dto';
 import { MessageDto } from './dto/message.dto';
 import { JobsDto } from '../jobs/dto/jobs.dto';
 import { UserDto } from '../users/dto/user.dto';
+import { User } from '../users/schemas/user.schema';
+import { AllUserChatDto } from './dto/allUserChatDto';
+import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 @Injectable()
 export class ChatbotService {
@@ -33,48 +36,53 @@ export class ChatbotService {
     };
   }
 
+  async getChatConversactionDetail(converId: string): Promise<MessageDto[]> {
+    const messages = await this.msgModel.find({
+      conversationId: new Types.ObjectId(converId)
+    }).sort({ createdAt: 1 }) // Sort 1 for oldest to newest (chat flow)
+    .exec();
+    return messages.map((message) => this.toDto(message))
+  }
 
-  async getChatUsers() {
-    const userConvers = await this.convoModel.aggregate([
-      // Flatten participants and remove 'AI'
-      { $unwind: "$participants" },
-      { $match: { participants: { $ne: MessageSender.AI_ASSISTANT } } },
-      // Group by User ID to get unique users
-      { $group: { _id: "$participants", lastActivity: { $max: "$updatedAt" } } },
-      // Join User details
-      {
-        $lookup: {
-          from: "users",
-          let: { userId: "$_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] } } }
-          ],
-          as: "details"
-        }
-      },
-      { $unwind: "$details" },
-      { $sort: { lastActivity: -1 } }
+
+  async getChatUserList(offset: number, limit: number): Promise<PaginatedDto<AllUserChatDto>> {
+    // 2. Run count and find in parallel for better performance
+    const [total, adminList] = await Promise.all([
+      this.convoModel.countDocuments(), 
+      this.convoModel.find()
+        .populate('createdBy', 'fullname')
+        .sort({ "updatedAt": -1 }) // Show most recent chats first
+        .skip(offset)
+        .limit(limit)
+        .lean()
     ]);
-    return userConvers.map((userConver) => {
-      return {
-        _id: userConver._id,
-        lastActivity: userConver.lastActivity,
-        role: userConver.details.role,
-        fullName: userConver.details?.fullName
-      }
-    })
+    return {
+      offset: offset,
+      limit: limit,
+      total: total,
+      results: adminList.map((userConver) => {
+        return {
+          conversationId: userConver._id.toString(),
+          lastActivity: userConver.updatedAt,
+          fullName: (userConver.createdBy as User).fullName || userConver.title,
+          lastMessage: userConver.lastMessage
+        }
+      })
+    }
   }
   
 
 
-  async getAIConversaction(userId: string, conversationId?: string) {
+  async getAIConversaction(userId: string, message: string, conversationId?: string) {
      if (conversationId) {
       return await this.convoModel.findById(conversationId);
     } else {
       return await this.convoModel.create({
         participants: [userId, MessageSender.AI_ASSISTANT],
         type: 'ai',
-        title: 'AI Assistant'
+        title: 'AI Assistant',
+        lastMessage: message,
+        createdBy: userId
       });
     }
   }
@@ -86,7 +94,7 @@ export class ChatbotService {
     conversationId?: string
   ): Promise<UserChatResponseDto> {
     // 1. Get/Create Conversation & Save User Message
-    const conversation = await this.getAIConversaction(userId, conversationId);
+    const conversation = await this.getAIConversaction(userId, content, conversationId);
     if (!conversation) throw new NotFoundException('Conversation not found');
     
     await this.msgModel.create({
@@ -103,6 +111,15 @@ export class ChatbotService {
   
     // 3. Process with AI
     return this.processAIResponse(conversation._id, userRole);
+  }
+
+  private async updateLastMessage(message: string, convId: string) {
+    // 2. Update the Conversation "Preview"
+    await this.convoModel.findByIdAndUpdate(convId, {
+      $set: {
+        lastMessage: message
+      }
+    });
   }
   
   /** 
@@ -124,6 +141,7 @@ export class ChatbotService {
       role: MessageRole.Assistant,
       content: text,
     });
+    await this.updateLastMessage(text, conversationId.toString());
   
     return {
       content: text,
@@ -176,6 +194,7 @@ export class ChatbotService {
       role: MessageRole.Assistant,
       content: aiContent.aiResponse,
     });
+    await this.updateLastMessage(rawTextResponse, conversationId.toString());
   
     return {
       content: rawTextResponse,

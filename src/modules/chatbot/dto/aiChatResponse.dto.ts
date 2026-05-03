@@ -12,7 +12,7 @@ export class UserChatDto {
 
 export class UserChatResponseDto extends UserChatDto {
   @ApiProperty()
-  messageDto: MessageDto;
+  messageDto!: MessageDto;
   @ApiProperty()
   jobDtos?: JobsDto[];
   @ApiProperty()

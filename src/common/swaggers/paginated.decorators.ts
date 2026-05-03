@@ -18,13 +18,13 @@ export function createPaginatedDto<TModel extends Type<unknown>>(Model: TModel) 
   @ApiExtraModels(Model)
   class PaginatedResponseDto implements PaginatedDto<TModel> {
     @ApiProperty()
-    total: number;
+    total!: number;
 
     @ApiProperty()
-    limit: number;
+    limit!: number;
 
     @ApiProperty()
-    offset: number;
+    offset!: number;
 
     @ApiProperty({
       // LAZY type reference is the key to avoid circular resolution:

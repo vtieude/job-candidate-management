@@ -1,8 +1,9 @@
 // src/assistant/schemas/conversation.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { BaseDoc } from '../../schemas/base.schema';
 import { ConversationType } from '../../../common/enums';
+import { User } from '../../users/schemas/user.schema';
 
 export type ConversationDocument = Conversation & Document;
 
@@ -16,6 +17,12 @@ export class Conversation extends BaseDoc {
 
   @Prop({ default: ConversationType.AI })
   type!: ConversationType
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  createdBy!: Types.ObjectId | User
+
+  @Prop({ default: 'AI Support Chat' })
+  lastMessage!: string // For quick preview in Admin list
 
   @Prop({ default: false })
   isResolved!: boolean;
