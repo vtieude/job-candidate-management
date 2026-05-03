@@ -3,6 +3,7 @@ import { ChatbotService } from './chatbot.service';
 import { CurrentUser, Public } from '../../common/decorators';
 import { UserRole } from '../../common/enums';
 import { UserChatDto, UserChatResponseDto } from './dto/aiChatResponse.dto';
+import { AllUserChatDto } from './dto/allUserChatDto';
 
 @Controller('chatbot')
 export class ChatbotController {
@@ -24,13 +25,9 @@ export class ChatbotController {
   }
   @Public()
   @Post('conversations')
-  async getAllUserConvers(
-    @Body() userChatDto: UserChatDto,
-    @CurrentUser('role') role: UserRole,
-    @CurrentUser('userId') userId: string
-  ) : Promise<any> {
+  async getAllUserConvers() : Promise<AllUserChatDto[]> {
     // Replace 'static-user-id' with req.user.id if using AuthGuards
-    return await this.chatbotService.getChatUsers(
+    return await this.chatbotService.getChatUserList(
     );
   }
 }

@@ -34,27 +34,46 @@ export class ChatbotService {
   }
 
 
-  async getChatUsers() {
+  async getChatUserList() {
     const userConvers = await this.convoModel.aggregate([
-      // Flatten participants and remove 'AI'
+      { $match: { type: 'AI' } },
       { $unwind: "$participants" },
-      { $match: { participants: { $ne: MessageSender.AI_ASSISTANT } } },
-      // Group by User ID to get unique users
-      { $group: { _id: "$participants", lastActivity: { $max: "$updatedAt" } } },
-      // Join User details
+      { $match: { participants: { $ne: "AI" } } },
+      { 
+        $group: { 
+          _id: "$participants", 
+          allConvIds: { $push: "$_id" },
+          // Track if ANY of their convos are still unresolved
+          isResolved: { $min: "$isResolved" } 
+        } 
+      },
+      // Join User Profile
       {
         $lookup: {
           from: "users",
           let: { userId: "$_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] } } }
-          ],
-          as: "details"
+          pipeline: [{ $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$userId" }] } } }],
+          as: "user"
         }
       },
-      { $unwind: "$details" },
-      { $sort: { lastActivity: -1 } }
-    ]);
+      { $unwind: "$user" },
+      // Join Last Message across all user's conversations
+      {
+        $lookup: {
+          from: "messages",
+          let: { convIds: "$allConvIds" },
+          pipeline: [
+            { $match: { $expr: { $in: ["$conversationId", "$$convIds"] } } },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 }
+          ],
+          as: "lastMessage"
+        }
+      },
+      { $unwind: { path: "$lastMessage", preserveNullAndEmptyArrays: true } },
+      { $sort: { "lastMessage.createdAt": -1 } }
+    ]);  
+    console.log(userConvers)
     return userConvers.map((userConver) => {
       return {
         _id: userConver._id,
