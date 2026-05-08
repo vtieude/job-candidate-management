@@ -12,6 +12,7 @@ export class OpenAiProvider extends  AiProvider {
 
     if (role === UserRole.Candidate) {
       return Boolean(
+        searchParams.title?.trim?.() ||
         searchParams.location?.trim?.() ||
         searchParams.company?.trim?.() ||
         searchParams.minSalary ||
@@ -72,7 +73,7 @@ export class OpenAiProvider extends  AiProvider {
 
   private getMissingFilterMessage(role: UserRole): string {
     if (role === UserRole.Candidate) {
-      return 'Please provide at least one job filter, such as location, skill, company, or salary.';
+      return 'Please provide at least one job filter, such as title, location, skill, company, or salary.';
     }
 
     if (role === UserRole.Recruiter) {
