@@ -50,7 +50,7 @@ export class ChatbotService {
     const [total, adminList] = await Promise.all([
       this.convoModel.countDocuments(), 
       this.convoModel.find()
-        .populate('createdBy', 'fullname')
+        .populate('createdBy', 'fullName email')
         .sort({ "updatedAt": -1 }) // Show most recent chats first
         .skip(offset)
         .limit(limit)
@@ -64,7 +64,7 @@ export class ChatbotService {
         return {
           conversationId: userConver._id.toString(),
           lastActivity: userConver.updatedAt,
-          fullName: (userConver.createdBy as User).fullName || userConver.title,
+          fullName: (userConver.createdBy as User).fullName || (userConver.createdBy as User).email,
           lastMessage: userConver.lastMessage
         }
       })

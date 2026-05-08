@@ -35,7 +35,7 @@ export class Notification extends BaseDoc {
 
   @ApiProperty({ type: String })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  recipient: Types.ObjectId | User;
+  recipient!: Types.ObjectId | User;
 
   @ApiProperty({ type: String, required: false })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
